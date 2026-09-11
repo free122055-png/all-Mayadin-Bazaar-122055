@@ -1,0 +1,166 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["customer", "admin"] },
+        "status": { "type": "string", "enum": ["active", "blocked"] },
+        "phoneNumber": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "address": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" },
+        "lastLoginAt": { "type": "number" }
+      },
+      "required": ["id", "email"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "nameBn": { "type": "string" },
+        "slug": { "type": "string" },
+        "order": { "type": "number" },
+        "image": { "type": "string" }
+      }
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Product information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "nameBn": { "type": "string" },
+        "slug": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "basePrice": { "type": "number" },
+        "stockStatus": { "type": "string" },
+        "isBestSelling": { "type": "boolean" },
+        "image": { "type": "string" }
+      }
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "total": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "items": { "type": "array" }
+      }
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      }
+    },
+    "WishlistItem": {
+      "title": "Wishlist Item",
+      "description": "Item in user's wishlist",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "productId": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "image": { "type": "string" }
+      }
+    },
+    "Address": {
+      "title": "Address",
+      "description": "User's saved address",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "label": { "type": "string" },
+        "fullAddress": { "type": "string" },
+        "receiverName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "isDefault": { "type": "boolean" }
+      }
+    },
+    "FoodOrder": {
+      "title": "Food Order",
+      "description": "Order from a food store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "total": { "type": "number" },
+        "status": { "type": "string" },
+        "items": { "type": "array" },
+        "createdAt": { "type": "number" }
+      }
+    },
+    "Store": {
+      "title": "Store",
+      "description": "Food store or restaurant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "isActive": { "type": "boolean" }
+      }
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Product categories"
+    },
+    "products/{productId}": {
+      "schema": "Product",
+      "description": "Products"
+    },
+    "orders/{orderId}": {
+      "schema": "Order",
+      "description": "Orders"
+    },
+    "food_orders/{orderId}": {
+      "schema": "FoodOrder",
+      "description": "Food orders"
+    },
+    "stores/{storeId}": {
+      "schema": "Store",
+      "description": "Food stores"
+    },
+    "notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Notifications"
+    },
+    "wishlist/{wishlistId}": {
+      "schema": "WishlistItem",
+      "description": "Wishlist items"
+    },
+    "addresses/{addressId}": {
+      "schema": "Address",
+      "description": "Saved addresses"
+    }
+  }
+}

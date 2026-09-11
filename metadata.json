@@ -1,0 +1,6 @@
+{
+  "name": "AL MAYADIN BAZAAR",
+  "description": "AL MAYADIN BAZAAR - Official e-commerce mobile app and marketplace for fresh foods, groceries, fashion, electronics, and daily essentials.",
+  "requestFramePermissions": ["camera", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

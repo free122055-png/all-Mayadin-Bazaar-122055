@@ -1,0 +1,90 @@
+name: Build Signed Android AAB (Google Play)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-aab:
+    name: Build & Sign AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Node Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Web Production Bundle
+        run: npm run build
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
+      - name: Inject Official Play Store Keystore
+        run: |
+          echo "=== Injecting Official Play Store Keystore ==="
+          mkdir -p android/app
+          node -e "
+          const fs = require('fs');
+          const b64 = fs.readFileSync('public/keystore_b64.txt', 'utf8').trim();
+          const buf = Buffer.from(b64, 'base64');
+          fs.writeFileSync('android/app/release.keystore', buf);
+          fs.writeFileSync('release.keystore', buf);
+          console.log('Keystore written successfully! Size:', buf.length, 'bytes');
+          "
+          ls -la android/app/release.keystore
+
+      - name: Grant Execute Permission to Gradle Wrapper
+        run: chmod +x android/gradlew
+
+      - name: Build Android App Bundle (AAB)
+        run: |
+          cd android
+          ./gradlew bundleRelease --no-daemon --stacktrace
+
+      - name: Sign AAB with Official Play Store Key
+        run: |
+          AAB_FILE=$(find android/app/build/outputs/bundle/release -name "*.aab" 2>/dev/null | head -n 1)
+          if [ -z "$AAB_FILE" ] || [ ! -f "$AAB_FILE" ]; then
+            echo "ERROR: Release AAB file not found!"
+            exit 1
+          fi
+          echo "Found generated AAB: $AAB_FILE"
+
+          KEYSTORE="android/app/release.keystore"
+          echo "Signing with official Google Play Keystore..."
+          jarsigner -verbose \
+            -sigalg SHA256withRSA \
+            -digestalg SHA-256 \
+            -keystore "$KEYSTORE" \
+            -storepass "almayadin123" \
+            -keypass "almayadin123" \
+            "$AAB_FILE" "almayadin"
+
+          echo "=== Verifying Signature ==="
+          jarsigner -verify -verbose -certs "$AAB_FILE" | grep -i "jar verified" || true
+          echo "=== AAB Signature Verified successfully! ==="
+
+      - name: Upload Signed AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: almayadin-release-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          retention-days: 30
