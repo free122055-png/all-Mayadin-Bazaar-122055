@@ -79,9 +79,11 @@ export const BottomNav: React.FC = () => {
           )}
           <div className="relative">
             <ShoppingCart className={`w-6 h-6 ${location.pathname === "/cart" ? "stroke-[2.5]" : "stroke-[1.8]"}`} />
-            <span className="absolute -top-1.5 -right-2 bg-[#ffb703] text-black text-[9.5px] font-black w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-white shadow-xs">
-              {totalItems > 0 ? totalItems : 1}
-            </span>
+            {totalItems > 0 && (
+              <span className="absolute -top-1.5 -right-2 bg-[#ffb703] text-black text-[9.5px] font-black min-w-4.5 h-4.5 px-1 flex items-center justify-center rounded-full border-2 border-white shadow-xs animate-scaleUp">
+                {totalItems > 99 ? "99+" : totalItems}
+              </span>
+            )}
           </div>
           <span className="text-[10px] font-bold">কার্ট</span>
         </Link>

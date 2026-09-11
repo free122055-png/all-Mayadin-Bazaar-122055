@@ -81,26 +81,58 @@ const LoadingFallback = () => (
 );
 
 function EmailPromptHandler() {
-  const { user, profile, updateUserEmail } = useAuth();
+  const { user, profile, updateUserEmail, skipEmailPrompt } = useAuth();
   const [showModal, setShowModal] = React.useState(false);
 
   React.useEffect(() => {
     if (user && profile) {
       const email = profile.email || "";
       const isPlaceholder = !email || email.includes("@allmayadin.com") || !email.includes("@");
-      const dismissed = sessionStorage.getItem("email_prompt_dismissed") === "true";
+      let dismissed = false;
+      try {
+        dismissed = 
+          Boolean(profile.emailSkipped) ||
+          localStorage.getItem("email_prompt_dismissed") === "true" ||
+          sessionStorage.getItem("email_prompt_dismissed") === "true";
+      } catch {}
+
       if (isPlaceholder && !dismissed) {
         setShowModal(true);
       } else {
         setShowModal(false);
       }
+    } else {
+      setShowModal(false);
     }
   }, [user, profile]);
 
   const handleSuccess = async (newEmail: string) => {
-    await updateUserEmail(newEmail);
-    sessionStorage.setItem("email_prompt_dismissed", "true");
     setShowModal(false);
+    try {
+      localStorage.setItem("email_prompt_dismissed", "true");
+      sessionStorage.setItem("email_prompt_dismissed", "true");
+    } catch {}
+
+    try {
+      await updateUserEmail(newEmail);
+    } catch (err) {
+      console.warn("Background updateUserEmail notice:", err);
+    }
+  };
+
+  const handleClose = async () => {
+    setShowModal(false);
+    try {
+      localStorage.setItem("email_prompt_dismissed", "true");
+      sessionStorage.setItem("email_prompt_dismissed", "true");
+    } catch {}
+    try {
+      if (skipEmailPrompt) {
+        await skipEmailPrompt();
+      }
+    } catch (err) {
+      console.warn("Background skip notice:", err);
+    }
   };
 
   return (
@@ -108,6 +140,8 @@ function EmailPromptHandler() {
       isOpen={showModal}
       currentUser={{ uid: user?.uid, phoneNumber: profile?.phoneNumber || user?.phoneNumber || "", email: profile?.email || "" }}
       onSuccess={handleSuccess}
+      onClose={handleClose}
+      onSkip={handleClose}
     />
   );
 }

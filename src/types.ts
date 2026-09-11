@@ -14,6 +14,8 @@ export interface UserProfile {
   isPhoneVerified?: boolean;
   otpState?: 'OTP_PENDING' | 'OTP_VERIFIED' | 'OTP_EXPIRED' | 'OTP_FAILED';
   phoneVerifiedAt?: number;
+  emailSkipped?: boolean;
+  emailPromptDismissedAt?: number;
   createdAt: number;
   updatedAt: number;
   lastLoginAt?: number;

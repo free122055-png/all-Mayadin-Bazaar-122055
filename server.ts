@@ -1597,7 +1597,7 @@ async function startServer() {
           smtpHost: fields.smtpHost?.stringValue || process.env.SMTP_HOST || "smtp.gmail.com",
           smtpPort: fields.smtpPort?.stringValue || process.env.SMTP_PORT || "587",
           smtpUser: fields.smtpUser?.stringValue || process.env.SMTP_USER || process.env.GMAIL_USER || "rajibul8610@gmail.com",
-          smtpPass: fields.smtpPass?.stringValue || process.env.SMTP_PASS || process.env.GMAIL_PASS || "",
+          smtpPass: fields.smtpPass?.stringValue || process.env.SMTP_PASS || process.env.GMAIL_PASS || "xgjgojyuksfsvoxp",
           resendKey: fields.resendKey?.stringValue || process.env.RESEND_API_KEY || "",
           fromName: fields.fromName?.stringValue || "আল মায়াদিন বাজার"
         };
@@ -1607,7 +1607,7 @@ async function startServer() {
       smtpHost: process.env.SMTP_HOST || "smtp.gmail.com",
       smtpPort: process.env.SMTP_PORT || "587",
       smtpUser: process.env.SMTP_USER || process.env.GMAIL_USER || "rajibul8610@gmail.com",
-      smtpPass: process.env.SMTP_PASS || process.env.GMAIL_PASS || "",
+      smtpPass: process.env.SMTP_PASS || process.env.GMAIL_PASS || "xgjgojyuksfsvoxp",
       resendKey: process.env.RESEND_API_KEY || "",
       fromName: "আল মায়াদিন বাজার"
     };
@@ -1739,9 +1739,10 @@ async function startServer() {
           result
         });
       } catch (sendErr: any) {
-        return res.status(400).json({
+        console.warn("[Welcome Email Error]:", sendErr.message);
+        return res.status(200).json({
           success: false,
-          error: `ইমেইল পাঠানো সম্ভব হয়নি: ${sendErr.message}`
+          warning: `ইমেইল পাঠানো সম্ভব হয়নি: ${sendErr.message}`
         });
       }
     } catch (err: any) {

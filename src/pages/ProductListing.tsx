@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, Search, Maximize, MapPin, ChevronDown, Bell, LayoutGrid, ShieldCheck, Truck, Banknote, Shield, ArrowLeft, ChevronRight, Star, Check, Scan, X, Zap } from "lucide-react";
+import { Heart, ShoppingCart, Search, Maximize, MapPin, ChevronDown, Bell, LayoutGrid, ShieldCheck, Truck, Banknote, Shield, ArrowLeft, ChevronRight, Star, Check, Scan, X, Zap, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { SEO } from "../components/SEO";
 import { useCart } from "../context/CartContext";

@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { db } from "../../lib/firebase";
-import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, limit, orderBy } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, limit, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { notificationService } from "../../lib/notifications";
 import { UserProfile } from "../../types";
 import { getApiUrl } from "../../lib/api";

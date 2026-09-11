@@ -47,6 +47,7 @@ interface AuthContextType {
   quickDemoLogin: (role?: 'customer' | 'admin') => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateUserEmail: (email: string) => Promise<void>;
+  skipEmailPrompt: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -442,18 +443,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateUserEmail = async (newEmail: string) => {
+    const cleanEmail = newEmail.trim().toLowerCase();
+    if (!cleanEmail) return;
+
+    // Optimistically update local profile state immediately
+    setProfile(prev => prev ? { ...prev, email: cleanEmail } : null);
+
     if (!user) return;
     try {
       const docRef = doc(db, "users", user.uid);
-      await updateDoc(docRef, {
-        email: newEmail,
+      await setDoc(docRef, {
+        email: cleanEmail,
+        emailSubscribed: true,
         updatedAt: serverTimestamp()
-      });
-      if (profile) {
-        setProfile({ ...profile, email: newEmail });
-      }
+      }, { merge: true });
     } catch (e) {
-      console.error("Error updating user email:", e);
+      console.warn("Error updating user email:", e);
+    }
+  };
+
+  const skipEmailPrompt = async () => {
+    try {
+      localStorage.setItem("email_prompt_dismissed", "true");
+      sessionStorage.setItem("email_prompt_dismissed", "true");
+    } catch {}
+
+    // Optimistically update state so prompt disappears immediately
+    setProfile(prev => prev ? { ...prev, emailSkipped: true } : null);
+
+    if (!user) return;
+    try {
+      const docRef = doc(db, "users", user.uid);
+      await setDoc(docRef, {
+        emailSkipped: true,
+        emailPromptDismissedAt: Date.now(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (e) {
+      console.warn("Error recording email skip:", e);
     }
   };
 
@@ -482,6 +509,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         quickDemoLogin,
         refreshProfile,
         updateUserEmail,
+        skipEmailPrompt,
       }}
     >
       {children}

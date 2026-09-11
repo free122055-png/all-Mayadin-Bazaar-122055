@@ -232,9 +232,11 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({ isOpen, onClose }) => {
                       <span className="group-hover:text-[#004b23] transition-colors">কার্ট</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="bg-[#004b23] text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-xs">
-                        {cartItems.length}
-                      </span>
+                      {cartItems.length > 0 && (
+                        <span className="bg-[#004b23] text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-xs">
+                          {cartItems.length}
+                        </span>
+                      )}
                       <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#004b23] group-hover:translate-x-0.5 transition-all" />
                     </div>
                   </button>
