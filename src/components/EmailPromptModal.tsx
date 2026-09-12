@@ -72,11 +72,23 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
       return;
     }
 
-    setLoading(true);
+    // 1. Instant optimistic UI success!
+    setIsSuccess(true);
     setError(null);
 
+    // Dismiss key setting
     try {
-      // 1. Save directly to Firestore email_subscribers collection (client-side guaranteed sync)
+      localStorage.setItem("email_prompt_dismissed", "true");
+      sessionStorage.setItem("email_prompt_dismissed", "true");
+    } catch {}
+
+    // Call success handler instantly to close modal and update UI state
+    try {
+      onSuccess(trimmed);
+    } catch {}
+
+    // 2. Perform database and backend notifications asynchronously in the background
+    (async () => {
       try {
         const cleanDocId = trimmed.replace(/[^a-zA-Z0-9]/g, "_");
         await setDoc(doc(db, "email_subscribers", cleanDocId), {
@@ -88,15 +100,8 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
           status: "active",
           createdAt: serverTimestamp()
         }, { merge: true });
-      } catch (dbErr) {
-        console.warn("[EmailPrompt] Direct Firestore subscriber save notice:", dbErr);
-      }
 
-      // 2. Dispatch to backend API for subscriber tracking & welcome email in parallel with short timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-      try {
+        // Dispatch background API updates
         await Promise.allSettled([
           fetch(getApiUrl("/api/emails/welcome"), {
             method: "POST",
@@ -104,8 +109,7 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
             body: JSON.stringify({
               recipientEmail: trimmed,
               customerName: currentUser?.phoneNumber || "সম্মানিত গ্রাহক"
-            }),
-            signal: controller.signal
+            })
           }),
           fetch(getApiUrl("/api/subscribers/save"), {
             method: "POST",
@@ -115,31 +119,13 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
               name: currentUser?.phoneNumber || "সম্মানিত গ্রাহক",
               phone: currentUser?.phoneNumber || "",
               uid: currentUser?.uid || ""
-            }),
-            signal: controller.signal
+            })
           })
         ]);
-      } catch (networkErr) {
-        console.warn("[EmailPrompt] Non-blocking backend notification notice:", networkErr);
-      } finally {
-        clearTimeout(timeoutId);
+      } catch (err) {
+        console.warn("[EmailPrompt] Background save error:", err);
       }
-
-      // 3. Mark dismissed in permanent storage
-      try {
-        localStorage.setItem("email_prompt_dismissed", "true");
-        sessionStorage.setItem("email_prompt_dismissed", "true");
-      } catch {}
-
-      setIsSuccess(true);
-
-      // 4. Update user profile and close modal
-      await Promise.resolve(onSuccess(trimmed));
-    } catch (err: any) {
-      console.error("[EmailPrompt] Error:", err);
-      setError(err.message || "ইমেল সেভ করতে সমস্যা হয়েছে।");
-      setLoading(false);
-    }
+    })();
   };
 
   return (
@@ -180,12 +166,12 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200/60 rounded-full">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span className="text-[11px] font-bold text-amber-800">ইমেইল প্রদান ঐচ্ছিক</span>
+            <span className="text-[11px] font-bold text-amber-800">অফার ও আপডেট (ঐচ্ছিক)</span>
           </div>
 
-          <h3 className="text-lg font-black text-gray-950">আপনার ইমেইল অ্যাড্রেস দিতে চান?</h3>
+          <h3 className="text-lg font-black text-gray-950">অফার ও আপডেট পেতে চান?</h3>
           <p className="text-xs text-gray-600 leading-relaxed max-w-xs mx-auto">
-            অর্ডারের ডিজিটাল ইনভয়েস ও স্পেশাল অফার পেতে আপনার ইমেইল যুক্ত করতে পারেন। না চাইলে এখনই এড়িয়ে যেতে পারেন।
+            আপনার অ্যাকাউন্ট মোবাইল নম্বর দিয়ে সুরক্ষিত। আপনি চাইলে ডিজিটাল ইনভয়েস ও স্পেশাল অফার পাওয়ার জন্য ইমেইল যোগ করতে পারেন। না চাইলে এড়িয়ে যান।
           </p>
         </div>
 
@@ -220,7 +206,7 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
             <div className="bg-emerald-50/60 p-3 rounded-2xl border border-emerald-100 flex items-center gap-2.5">
               <ShieldCheck className="w-4 h-4 text-[#004b23] shrink-0" />
               <p className="text-[11px] text-emerald-900 font-medium leading-tight">
-                ইমেইল যুক্ত করলে নিশ্চিতকরণ ও তাৎক্ষণিক স্বাগত বার্তা পাঠানো হবে।
+                ইমেইল দিলে সাথে সাথে নিশ্চিতকরণ ও অফার আপডেট পাঠানো হবে। না দিলে কোনো ইমেইল যাবে না।
               </p>
             </div>
 

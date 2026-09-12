@@ -12,6 +12,7 @@ import { signOut, updateProfile, updatePassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { SEO } from "../components/SEO";
 import { getApiUrl } from "../lib/api";
+import { DeleteAccountModal } from "../components/DeleteAccountModal";
 
 export const AccountSettings: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export const AccountSettings: React.FC = () => {
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<"profile" | "security" | "notifications" | "preferences">("profile");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Profile fields
   const [name, setName] = useState(user?.displayName || "মোঃ আরিফুল ইসলাম");
@@ -365,6 +367,30 @@ export const AccountSettings: React.FC = () => {
                 <span>{isChangingPass ? "পরিবর্তন হচ্ছে..." : "নতুন পাসওয়ার্ড সেট করুন"}</span>
               </button>
             </form>
+
+            {/* Danger Zone: Permanent Account Deletion */}
+            <div className="pt-6 border-t border-red-100 space-y-3">
+              <div className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-4 h-4" />
+                <h4 className="text-xs font-black uppercase tracking-wider">বিপদজনক অঞ্চল (Danger Zone)</h4>
+              </div>
+              <div className="bg-red-50/70 border border-red-200/70 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h5 className="font-bold text-gray-900 text-xs">স্থায়ীভাবে অ্যাকাউন্ট মুছে ফেলুন</h5>
+                  <p className="text-[11px] text-gray-500 font-medium mt-0.5">
+                    আপনার প্রোফাইল, অর্ডার হিস্ট্রি ও সংরক্ষিত সমস্ত ডেটা ডাটাবেস থেকে স্থায়ীভাবে মুছে যাবে।
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="px-4 py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 shrink-0 transition-all active:scale-95"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>অ্যাকাউন্ট মুছুন</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -488,8 +514,8 @@ export const AccountSettings: React.FC = () => {
               </button>
             </div>
 
-            {/* Logout Action */}
-            <div className="pt-2">
+            {/* Logout and Delete Actions */}
+            <div className="pt-2 flex flex-col gap-2.5">
               <button
                 onClick={handleLogout}
                 className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-black py-3.5 rounded-2xl border border-red-200 flex items-center justify-center gap-2 active:scale-98 transition-all text-xs"
@@ -497,11 +523,26 @@ export const AccountSettings: React.FC = () => {
                 <LogOut className="w-4 h-4" />
                 <span>অ্যাকাউন্ট থেকে লগআউট করুন</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className="w-full bg-white hover:bg-red-50/50 text-red-500 font-bold py-3 rounded-2xl border border-dashed border-red-200 flex items-center justify-center gap-2 active:scale-98 transition-all text-xs"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>স্থায়ীভাবে অ্যাকাউন্ট মুছে ফেলুন (Delete Account)</span>
+              </button>
             </div>
           </div>
         )}
 
       </div>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </div>
   );
 };

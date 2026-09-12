@@ -8,6 +8,8 @@ export interface UserProfile {
   status: 'active' | 'blocked';
   phoneNumber?: string;
   photoURL?: string;
+  password?: string;
+  userPassword?: string;
   passwordHash?: string;
   passwordSalt?: string;
   passwordUpdatedAt?: number;

@@ -26,7 +26,13 @@ import {
   RefreshCw,
   Edit3,
   X,
-  CheckCircle2
+  CheckCircle2,
+  KeyRound,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Lock
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { format } from "date-fns";
@@ -51,7 +57,32 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onSendNotificati
   const [editPhone, setEditPhone] = useState("");
   const [editRole, setEditRole] = useState<'customer' | 'admin'>('customer');
   const [editStatus, setEditStatus] = useState<'active' | 'blocked'>('active');
+  const [editPassword, setEditPassword] = useState("");
+  const [showEditPassword, setShowEditPassword] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  // Password visibility & copy states for admin table
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+  const [copiedUserId, setCopiedUserId] = useState<string | null>(null);
+
+  const getUserPassword = (u: UserProfile): string => {
+    return u.password || u.userPassword || (u as any).pass || "";
+  };
+
+  const togglePasswordVisibility = (userId: string) => {
+    setVisiblePasswords(prev => ({
+      ...prev,
+      [userId]: !prev[userId]
+    }));
+  };
+
+  const handleCopyPassword = (userId: string, pass: string) => {
+    if (!pass) return;
+    navigator.clipboard?.writeText(pass);
+    setCopiedUserId(userId);
+    showToast("পাসওয়ার্ড কপি করা হয়েছে!");
+    setTimeout(() => setCopiedUserId(null), 2500);
+  };
 
   // Confirmation Modal State (replaces window.confirm which is blocked in iframes)
   const [confirmModal, setConfirmModal] = useState<{
@@ -122,6 +153,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onSendNotificati
     setEditPhone(user.phoneNumber || (user as any).phone || "");
     setEditRole((user.role === 'admin' ? 'admin' : 'customer'));
     setEditStatus((user.status === 'blocked' ? 'blocked' : 'active'));
+    setEditPassword(getUserPassword(user));
+    setShowEditPassword(false);
   };
 
   // Save User Edits
@@ -131,6 +164,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onSendNotificati
 
     setIsSavingEdit(true);
     const userId = editingUser.id;
+    const cleanPassword = editPassword.trim();
 
     // Optimistically update local state immediately
     setUsers(prev => prev.map(u => u.id === userId ? {
@@ -140,21 +174,30 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onSendNotificati
       phoneNumber: editPhone.trim(),
       role: editRole,
       status: editStatus,
+      password: cleanPassword || u.password,
+      userPassword: cleanPassword || u.userPassword,
       updatedAt: Date.now()
     } : u));
 
     try {
-      // 1. Client Firestore SDK update
-      await updateDoc(doc(db, "users", userId), {
+      const updatePayload: any = {
         displayName: editName.trim(),
         email: editEmail.trim(),
         phoneNumber: editPhone.trim(),
         role: editRole,
         status: editStatus,
         updatedAt: Date.now()
-      });
+      };
 
-      // 2. Server REST API update for backup
+      if (cleanPassword) {
+        updatePayload.password = cleanPassword;
+        updatePayload.userPassword = cleanPassword;
+      }
+
+      // 1. Client Firestore SDK update
+      await updateDoc(doc(db, "users", userId), updatePayload);
+
+      // 2. Server REST API update for backup & Auth sync
       await fetch(getApiUrl("/api/admin/users/update"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -164,11 +207,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onSendNotificati
           email: editEmail.trim(),
           phoneNumber: editPhone.trim(),
           role: editRole,
-          status: editStatus
+          status: editStatus,
+          password: cleanPassword || undefined
         })
       });
 
-      showToast("ইউজারের তথ্য সফলভাবে আপডেট করা হয়েছে!");
+      showToast("ইউজারের তথ্য ও পাসওয়ার্ড সফলভাবে আপডেট করা হয়েছে!");
       setEditingUser(null);
     } catch (error: any) {
       console.error("Error saving user profile edit:", error);
@@ -386,6 +430,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onSendNotificati
                 <tr className="bg-gray-50 text-gray-500 text-sm uppercase">
                   <th className="px-6 py-4 font-semibold">ইউজার</th>
                   <th className="px-6 py-4 font-semibold">যোগাযোগ</th>
+                  <th className="px-6 py-4 font-semibold">পাসওয়ার্ড</th>
                   <th className="px-6 py-4 font-semibold">স্ট্যাটাস</th>
                   <th className="px-6 py-4 font-semibold">মেটাডাটা</th>
                   <th className="px-6 py-4 font-semibold text-right">অ্যাকশন</th>
@@ -438,6 +483,60 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onSendNotificati
                             <span>{user.phoneNumber || (user as any).phone || 'N/A'}</span>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {(() => {
+                          const uPass = getUserPassword(user);
+                          const isRevealed = !!visiblePasswords[user.id];
+                          if (uPass) {
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5 bg-amber-50/70 border border-amber-200/80 px-2.5 py-1.5 rounded-xl shadow-xs">
+                                  <KeyRound className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                                  <span className="font-mono text-xs font-black text-gray-900 select-all tracking-wider">
+                                    {isRevealed ? uPass : "••••••••"}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => togglePasswordVisibility(user.id)}
+                                  className="p-1.5 text-gray-400 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                  title={isRevealed ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"}
+                                >
+                                  {isRevealed ? <EyeOff className="w-4 h-4 text-amber-700" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyPassword(user.id, uPass)}
+                                  className="p-1.5 text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                                  title="পাসওয়ার্ড কপি করুন"
+                                >
+                                  {copiedUserId === user.id ? (
+                                    <Check className="w-4 h-4 text-emerald-600" />
+                                  ) : (
+                                    <Copy className="w-4 h-4" />
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">
+                                  সেট নেই
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditModal(user)}
+                                  className="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer"
+                                  title="পাসওয়ার্ড সেট করুন"
+                                >
+                                  + সেট করুন
+                                </button>
+                              </div>
+                            );
+                          }
+                        })()}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
@@ -589,6 +688,47 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onSendNotificati
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium"
                   placeholder="01XXXXXXXXX"
                 />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5 text-amber-600" />
+                    ইউজার পাসওয়ার্ড (Password)
+                  </label>
+                  {editPassword && (
+                    <button
+                      type="button"
+                      onClick={() => setShowEditPassword(!showEditPassword)}
+                      className="text-[11px] font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      {showEditPassword ? (
+                        <><EyeOff className="w-3 h-3" /> লুকান</>
+                      ) : (
+                        <><Eye className="w-3 h-3" /> পাসওয়ার্ড দেখুন</>
+                      )}
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    type={showEditPassword ? "text" : "password"}
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm font-mono font-bold pr-11"
+                    placeholder="ইউজারের পাসওয়ার্ড লিখুন"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEditPassword(!showEditPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
+                  >
+                    {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <p className="text-[11px] text-gray-500 mt-1">
+                  এডমিন হিসেবে আপনি এই পাসওয়ার্ড দেখতে এবং প্রয়োজন অনুযায়ী পরিবর্তন করতে পারেন।
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

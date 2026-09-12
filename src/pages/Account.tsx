@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { User, Package, MapPin, Heart, Bell, Shield, LogOut, ChevronRight, Settings, Edit3, X, Check, Camera, Phone, FileText, LockIcon } from "lucide-react";
+import { User, Package, MapPin, Heart, Bell, Shield, LogOut, ChevronRight, Settings, Edit3, X, Check, Camera, Phone, FileText, LockIcon, Trash2, AlertTriangle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNotificationContext } from "../context/NotificationContext";
 import { auth, db } from "../lib/firebase";
 import { signOut, updateProfile as updateFirebaseProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp, collection, query, where, getDocs } from "firebase/firestore";
 import { handleFirestoreError, OperationType } from "../lib/firebase";
+import { DeleteAccountModal } from "../components/DeleteAccountModal";
 
 export const Account: React.FC = () => {
   const { user, profile, loading, refreshProfile } = useAuth();
@@ -15,6 +16,7 @@ export const Account: React.FC = () => {
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [photoURL, setPhotoURL] = useState("");
@@ -77,6 +79,7 @@ export const Account: React.FC = () => {
     { icon: MapPin, label: "📍 সংরক্ষিত ঠিকানা", path: "/addresses" },
     { icon: Bell, label: "🔔 বিজ্ঞপ্তি", path: "/notifications", count: unreadCount > 0 ? unreadCount.toString() : null },
     { icon: User, label: "👤 প্রোফাইল এডিট", action: () => setIsEditing(true) },
+    { icon: Settings, label: "⚙️ অ্যাকাউন্ট ও পাসওয়ার্ড সেটিংস", path: "/account/settings" },
   ];
 
   const legalMenu = [
@@ -321,6 +324,30 @@ export const Account: React.FC = () => {
           </div>
         </div>
 
+        {/* Account Security & Danger Zone Section */}
+        <div className="space-y-3">
+          <h3 className="px-4 text-[13px] font-black text-gray-400 uppercase tracking-widest">অ্যাকাউন্ট নিয়ন্ত্রণ</h3>
+          <div className="bg-white rounded-[32px] p-2 shadow-sm border border-gray-100 overflow-hidden">
+            <div className="divide-y divide-gray-50">
+              <button 
+                onClick={() => setShowDeleteModal(true)}
+                className="w-full flex items-center justify-between py-4 px-3 group hover:bg-red-50/70 rounded-2xl transition-colors text-left"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                    <Trash2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-red-600 text-sm block">স্থায়ীভাবে অ্যাকাউন্ট মুছে ফেলুন</span>
+                    <span className="text-[11px] text-gray-400 font-medium">আপনার প্রোফাইল ও সমস্ত ডেটা স্থায়ীভাবে ডিলিট করুন</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-red-400 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Legal & Security Section */}
         <div className="space-y-3">
           <h3 className="px-4 text-[13px] font-black text-gray-400 uppercase tracking-widest">আইনি ও নিরাপত্তা</h3>
@@ -359,6 +386,12 @@ export const Account: React.FC = () => {
       <div className="text-center text-[10px] text-gray-400 font-medium pb-6">
         App Version 8.0 • AL MAYADIN BAZAAR
       </div>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </div>
   );
 };

@@ -58,41 +58,49 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({ isOpen, onClose }) => {
 
   const handleSaveEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailInput.trim() || !emailInput.includes("@")) {
+    const targetEmail = emailInput.trim();
+    if (!targetEmail || !targetEmail.includes("@")) {
       setEmailError("দয়া করে একটি সঠিক ইমেইল অ্যাড্রেস লিখুন।");
       return;
     }
 
     setEmailError("");
-    setIsSavingEmail(true);
+    // 1. Optimistic success instantly!
+    setEmailSavedSuccess(true);
+    setTimeout(() => setEmailSavedSuccess(false), 5000);
 
-    try {
-      const res = await fetch(getApiUrl("/api/subscribers/save"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: emailInput.trim(),
-          name: profile?.displayName || user?.displayName || "সম্মানিত গ্রাহক",
-          phone: profile?.phoneNumber || user?.phoneNumber || "",
-          uid: user?.uid || ""
-        })
-      });
+    // 2. Perform network tracking & profile updates in background
+    (async () => {
+      try {
+        await fetch(getApiUrl("/api/subscribers/save"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: targetEmail,
+            name: profile?.displayName || user?.displayName || "সম্মানিত গ্রাহক",
+            phone: profile?.phoneNumber || user?.phoneNumber || "",
+            uid: user?.uid || ""
+          })
+        });
 
-      const data = await res.json();
-      if (data.success) {
+        // Trigger welcome email in the background
+        fetch(getApiUrl("/api/emails/welcome"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            recipientEmail: targetEmail,
+            customerName: profile?.displayName || user?.displayName || "সম্মানিত গ্রাহক",
+            phone: profile?.phoneNumber || user?.phoneNumber || ""
+          })
+        }).catch(() => {});
+
         if (updateUserEmail) {
-          try { await updateUserEmail(emailInput.trim()); } catch (err) {}
+          await updateUserEmail(targetEmail);
         }
-        setEmailSavedSuccess(true);
-        setTimeout(() => setEmailSavedSuccess(false), 5000);
-      } else {
-        setEmailError(data.error || "ইমেইল সেভ করা সম্ভব হয়নি।");
+      } catch (err: any) {
+        console.warn("[MenuDrawer] Background email sync notice:", err);
       }
-    } catch (err: any) {
-      setEmailError("নেটওয়ার্ক সমস্যা: " + err.message);
-    } finally {
-      setIsSavingEmail(false);
-    }
+    })();
   };
 
   const handleNavigate = (path: string) => {

@@ -34,10 +34,11 @@ export const OtpVerificationView: React.FC<OtpVerificationViewProps> = ({
     return () => clearInterval(interval);
   }, [cooldown]);
 
-  // Focus first input on mount
+  // Focus first input on mount and request OTP
   useEffect(() => {
     inputRefs.current[0]?.focus();
-  }, []);
+    otpService.sendOtp(phoneNumber).catch(() => {});
+  }, [phoneNumber]);
 
   const handleDigitChange = (index: number, value: string) => {
     setError(null);
@@ -107,9 +108,7 @@ export const OtpVerificationView: React.FC<OtpVerificationViewProps> = ({
       const result = await otpService.verifyOtp(phoneNumber, codeToVerify);
       if (result.success && result.verificationToken) {
         setSuccessMsg(result.message || "মোবাইল নম্বর সফলভাবে যাচাই হয়েছে!");
-        setTimeout(() => {
-          onVerified(result.verificationToken!);
-        }, 500);
+        onVerified(result.verificationToken!);
       } else {
         setError(result.error || "ভুল OTP কোড। দয়া করে সঠিক কোড দিন।");
         if (result.remainingAttempts !== undefined) {

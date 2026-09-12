@@ -16,12 +16,15 @@ import {
   UserPlus,
   LogIn,
   KeyRound,
-  ShoppingBag
+  ShoppingBag,
+  MessageSquare,
+  ExternalLink,
+  Copy,
+  Check,
+  Headphones
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../context/AuthContext";
-import { otpService } from "../lib/otpService";
-import { OtpVerificationView } from "./OtpVerificationView";
 import { parseBangladeshiPhone } from "../lib/phoneUtils";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 
@@ -46,7 +49,7 @@ export const AuthModal: React.FC = () => {
     quickDemoLogin 
   } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot' | 'otp'>((authModalMode as any) || 'login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot'>((authModalMode as any) || 'login');
   
   // Sync tab when modal opens with a specific mode
   React.useEffect(() => {
@@ -145,10 +148,6 @@ export const AuthModal: React.FC = () => {
       setErrorMsg("আপনার মোবাইল নম্বর প্রদান করুন।");
       return;
     }
-    if (!regEmail.trim()) {
-      setErrorMsg("আপনার ইমেইল এড্রেস প্রদান করুন।");
-      return;
-    }
     if (regPassword.length < 6) {
       setErrorMsg("পাসওয়ার্ড নূন্যতম ৬ অক্ষরের হতে হবে।");
       return;
@@ -164,55 +163,6 @@ export const AuthModal: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // 1. Check if Admin enabled OTP verification
-      const otpStatus = await otpService.getStatus();
-
-      if (otpStatus.otpVerificationEnabled) {
-        if (!otpStatus.masterEnabled) {
-          setErrorMsg("OTP verification service is temporarily unavailable. Please try again later.");
-          setIsLoading(false);
-          return;
-        }
-
-        const sendResult = await otpService.sendOtp(regPhone);
-        if (!sendResult.success) {
-          setErrorMsg(sendResult.error || "OTP পাঠাতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
-          setIsLoading(false);
-          return;
-        }
-
-        // Switch to OTP tab
-        setActiveTab('otp');
-        setIsLoading(false);
-        return;
-      }
-
-      // 2. Direct registration if OTP is disabled (Zero regression)
-      const normalizedDigits = regPhone.trim().replace(/[^0-9]/g, "").slice(-10);
-      const dummyEmail = `${normalizedDigits}@allmayadin.com`;
-
-      await registerWithEmail({
-        name: regName,
-        email: dummyEmail, // Use phone-based dummy email for consistency
-        phone: regPhone,
-        password: regPassword,
-        address: regAddress,
-        photoURL: selectedAvatar,
-        isPhoneVerified: false,
-        otpState: "OTP_VERIFIED"
-      });
-      setSuccessMsg("আপনার অ্যাকাউন্টটি সফলভাবে তৈরি হয়েছে!");
-    } catch (err: any) {
-      setErrorMsg(handleFirebaseError(err));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOtpVerifiedInModal = async (verificationToken: string) => {
-    setIsLoading(true);
-    setErrorMsg(null);
-    try {
       const normalizedDigits = regPhone.trim().replace(/[^0-9]/g, "").slice(-10);
       const dummyEmail = `${normalizedDigits}@allmayadin.com`;
 
@@ -224,14 +174,11 @@ export const AuthModal: React.FC = () => {
         address: regAddress,
         photoURL: selectedAvatar,
         isPhoneVerified: true,
-        otpState: "OTP_VERIFIED",
-        phoneVerifiedAt: Date.now(),
-        otpVerificationToken: verificationToken
+        otpState: "OTP_VERIFIED"
       });
-      setSuccessMsg("আপনার অ্যাকাউন্টটি সফলভাবে তৈরি ও মোবাইল নম্বর যাচাই হয়েছে!");
+      setSuccessMsg("আপনার অ্যাকাউন্টটি সফলভাবে তৈরি হয়েছে!");
     } catch (err: any) {
       setErrorMsg(handleFirebaseError(err));
-      setActiveTab('register');
     } finally {
       setIsLoading(false);
     }
@@ -380,17 +327,17 @@ export const AuthModal: React.FC = () => {
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-black text-gray-700 mb-1.5">
-                  ইমেইল অথবা মোবাইল নম্বর
+                  মোবাইল নম্বর (অ্যাকাউন্ট নম্বর)
                 </label>
                 <div className="relative">
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Mail className="w-4 h-4" />
+                    <Phone className="w-4 h-4" />
                   </div>
                   <input
                     type="text"
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder="example@mail.com অথবা 017XXXXXXXX"
+                    placeholder="017XXXXXXXX"
                     className="w-full bg-gray-50 border border-gray-200 focus:border-[#007f3e] focus:bg-white text-gray-900 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold focus:outline-none transition-all placeholder:text-gray-400 placeholder:font-normal"
                     required
                   />
@@ -404,8 +351,8 @@ export const AuthModal: React.FC = () => {
                   </label>
                   <button
                     type="button"
-                    onClick={() => { setActiveTab('forgot'); setErrorMsg(null); }}
-                    className="text-[11px] font-bold text-[#007f3e] hover:underline"
+                    onClick={() => { setShowForgotResetModal(true); setErrorMsg(null); }}
+                    className="text-[11px] font-bold text-[#007f3e] hover:underline cursor-pointer"
                   >
                     পাসওয়ার্ড ভুলে গেছেন?
                   </button>
@@ -569,7 +516,7 @@ export const AuthModal: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-black text-gray-700 mb-1">
-                    ইমেইল এড্রেস <span className="text-red-500">*</span>
+                    ইমেইল এড্রেস (ঐচ্ছিক - অফার ও আপডেটের জন্য)
                   </label>
                   <div className="relative">
                     <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -581,7 +528,6 @@ export const AuthModal: React.FC = () => {
                       onChange={(e) => setRegEmail(e.target.value)}
                       placeholder="example@mail.com"
                       className="w-full bg-gray-50 border border-gray-200 focus:border-[#007f3e] focus:bg-white text-gray-900 rounded-2xl py-2.5 pl-10 pr-4 text-xs font-bold focus:outline-none transition-all placeholder:text-gray-400 placeholder:font-normal"
-                      required
                     />
                   </div>
                 </div>
@@ -687,62 +633,50 @@ export const AuthModal: React.FC = () => {
 
           {/* TAB 3: FORGOT PASSWORD */}
           {activeTab === 'forgot' && (
-            <form onSubmit={handleForgotSubmit} className="space-y-4">
-              <div className="text-center py-2">
-                <div className="w-12 h-12 rounded-full bg-[#e6f4ea] text-[#007f3e] flex items-center justify-center mx-auto mb-2">
-                  <KeyRound className="w-6 h-6" />
+            <div className="space-y-4 py-2">
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-2xl bg-[#25D366]/15 text-[#25D366] flex items-center justify-center mx-auto mb-2.5">
+                  <MessageSquare className="w-6 h-6 fill-current" />
                 </div>
-                <h3 className="text-sm font-black text-gray-900">পাসওয়ার্ড পুনরুদ্ধার</h3>
-                <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto">
-                  আপনার একাউন্টের ইমেইল ঠিকানা দিন। আমরা পাসওয়ার্ড রিসেটের লিংক পাঠিয়ে দেব।
+                <h3 className="text-base font-black text-gray-900">পাসওয়ার্ড পুনরুদ্ধার সহায়তা</h3>
+                <p className="text-xs text-gray-600 mt-1 max-w-xs mx-auto leading-relaxed">
+                  পাসওয়ার্ডের জন্য কোনো ওটিপির প্রয়োজন নেই। সরাসরি আমাদের অফিসিয়াল হোয়াটসঅ্যাপে যোগাযোগ করুন।
                 </p>
               </div>
 
-              <div>
-                <label className="block text-xs font-black text-gray-700 mb-1.5">
-                  ইমেইল এড্রেস
-                </label>
-                <div className="relative">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Mail className="w-4 h-4" />
+              <div className="bg-emerald-50 rounded-2xl p-3.5 border border-emerald-200">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <span className="block text-[10px] font-bold text-emerald-800 uppercase tracking-wider">অফিসিয়াল হোয়াটসঅ্যাপ</span>
+                    <span className="font-mono font-black text-gray-900 text-sm">01618599077</span>
                   </div>
-                  <input
-                    type="email"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
-                    placeholder="example@mail.com"
-                    className="w-full bg-gray-50 border border-gray-200 focus:border-[#007f3e] focus:bg-white text-gray-900 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold focus:outline-none transition-all placeholder:text-gray-400 placeholder:font-normal"
-                    required
-                  />
+                  <a
+                    href="tel:01618599077"
+                    className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shadow-sm"
+                  >
+                    <Phone className="w-3.5 h-3.5" /> কল করুন
+                  </a>
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3.5 bg-[#007f3e] hover:bg-[#006e36] text-white font-black text-sm rounded-2xl shadow-lg shadow-[#007f3e]/20 flex items-center justify-center gap-2 active:scale-98 transition-all disabled:opacity-50"
+              <a
+                href={`https://wa.me/8801618599077?text=${encodeURIComponent("আসসালামু আলাইকুম, আমি আল মায়াদীন বাজার অ্যাপে আমার অ্যাকাউন্টের পাসওয়ার্ড ভুলে গেছি। অনুগ্রহ করে আমার অ্যাকাউন্ট পাসওয়ার্ড পুনরুদ্ধার করতে সাহায্য করুন।")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3.5 bg-[#25D366] hover:bg-[#20bd5a] text-white font-black text-sm rounded-2xl shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
               >
-                {isLoading ? "পাঠানো হচ্ছে..." : "রিসেট লিংক পাঠান"}
-              </button>
+                <MessageSquare className="w-4 h-4 fill-current" />
+                <span>হোয়াটসঅ্যাপে মেসেজ পাঠান</span>
+                <ExternalLink className="w-4 h-4 opacity-80" />
+              </a>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('login')}
-                className="w-full text-center text-xs font-bold text-gray-500 hover:text-gray-800"
+                className="w-full text-center text-xs font-bold text-gray-500 hover:text-gray-800 pt-1"
               >
                 লগইন পেজে ফিরে যান
               </button>
-            </form>
-          )}
-
-          {/* TAB 4: OTP VERIFICATION */}
-          {activeTab === 'otp' && (
-            <div className="py-2">
-              <OtpVerificationView
-                phoneNumber={regPhone}
-                onVerified={handleOtpVerifiedInModal}
-                onBack={() => setActiveTab('register')}
-              />
             </div>
           )}
         </div>

@@ -13,6 +13,8 @@
         "phoneNumber": { "type": "string" },
         "photoURL": { "type": "string" },
         "address": { "type": "string" },
+        "password": { "type": "string" },
+        "userPassword": { "type": "string" },
         "createdAt": { "type": "number" },
         "updatedAt": { "type": "number" },
         "lastLoginAt": { "type": "number" }

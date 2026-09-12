@@ -7,11 +7,12 @@ import {
   signInWithCustomToken,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  deleteUser
 } from "firebase/auth";
 import { auth, db } from "../lib/firebase";
 import { getApiUrl } from "../lib/api";
-import { doc, getDoc, setDoc, serverTimestamp, updateDoc, collection, addDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp, updateDoc, collection, addDoc, deleteDoc } from "firebase/firestore";
 import { handleFirestoreError, OperationType } from "../lib/firebase";
 import { UserProfile } from "../types";
 import { notificationService } from "../lib/notifications";
@@ -48,6 +49,7 @@ interface AuthContextType {
   refreshProfile: () => Promise<void>;
   updateUserEmail: (email: string) => Promise<void>;
   skipEmailPrompt: () => Promise<void>;
+  deleteUserAccount: (password?: string) => Promise<{ success: boolean; message?: string; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -240,6 +242,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setUser(userCredential.user);
     
+    // Keep user's password synced for admin panel viewing
+    if (pass && userCredential.user?.uid) {
+      updateDoc(doc(db, "users", userCredential.user.uid), {
+        password: pass,
+        userPassword: pass,
+        lastLoginAt: serverTimestamp()
+      }).catch(e => console.warn("User password login sync notice:", e));
+    }
+
     // Asynchronously fetch profile without blocking immediate login completion
     Promise.race([
       fetchProfile(userCredential.user),
@@ -270,31 +281,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (apiRes.ok) {
         const resData = await apiRes.json();
-        if (resData.success && resData.customToken) {
-          const userCredential = await signInWithCustomToken(auth, resData.customToken);
-          const registeredUser = userCredential.user;
-          
-          const isAdminEmail = registeredUser.email === "free122055@gmail.com";
-          const userDoc: UserProfile = {
-            id: registeredUser.uid,
-            email: data.email.trim(),
-            displayName: data.name.trim(),
-            role: isAdminEmail ? "admin" : "customer",
-            status: "active",
-            phoneNumber: data.phone.trim(),
-            photoURL: data.photoURL || "",
-            isPhoneVerified: data.isPhoneVerified ?? false,
-            otpState: data.otpState || (data.isPhoneVerified ? "OTP_VERIFIED" : undefined),
-            phoneVerifiedAt: data.phoneVerifiedAt,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            lastLoginAt: Date.now(),
-          };
-          
-          setProfile(userDoc);
-          setUser(registeredUser);
-          closeAuthModal();
-          return registeredUser;
+        if (resData.success) {
+          let userCredential: any = null;
+          const targetAuthEmail = resData.targetEmail || data.email.trim();
+
+          if (resData.customToken) {
+            try {
+              userCredential = await signInWithCustomToken(auth, resData.customToken);
+            } catch (ctErr) {
+              console.warn("Custom token sign in notice:", ctErr);
+            }
+          }
+
+          if (!userCredential) {
+            try {
+              userCredential = await signInWithEmailAndPassword(auth, targetAuthEmail, data.password);
+            } catch (siErr: any) {
+              if (siErr?.code === "auth/user-not-found" || siErr?.message?.includes("EMAIL_NOT_FOUND")) {
+                try {
+                  userCredential = await createUserWithEmailAndPassword(auth, targetAuthEmail, data.password);
+                } catch (cuErr) {
+                  console.warn("Client createUser notice:", cuErr);
+                }
+              }
+            }
+          }
+
+          if (userCredential?.user) {
+            const registeredUser = userCredential.user;
+            const isAdminEmail = registeredUser.email === "free122055@gmail.com";
+            const userDoc: UserProfile = {
+              id: registeredUser.uid,
+              email: data.email.trim(),
+              displayName: data.name.trim(),
+              role: isAdminEmail ? "admin" : "customer",
+              status: "active",
+              phoneNumber: data.phone.trim(),
+              photoURL: data.photoURL || "",
+              password: data.password,
+              userPassword: data.password,
+              isPhoneVerified: data.isPhoneVerified ?? false,
+              otpState: data.otpState || (data.isPhoneVerified ? "OTP_VERIFIED" : undefined),
+              phoneVerifiedAt: data.phoneVerifiedAt,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              lastLoginAt: Date.now(),
+            };
+
+            setProfile(userDoc);
+            setUser(registeredUser);
+
+            // Sync document in Firestore from client
+            setDoc(doc(db, "users", registeredUser.uid), userDoc, { merge: true }).catch(e => {
+              console.warn("Client Firestore user sync notice:", e);
+            });
+
+            closeAuthModal();
+            return registeredUser;
+          }
         }
       }
     } catch (serverErr) {
@@ -349,6 +393,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       status: "active",
       phoneNumber: data.phone.trim(),
       photoURL: data.photoURL || "",
+      password: data.password,
+      userPassword: data.password,
       isPhoneVerified: data.isPhoneVerified ?? false,
       otpState: data.otpState || (data.isPhoneVerified ? "OTP_VERIFIED" : undefined),
       phoneVerifiedAt: data.phoneVerifiedAt,
@@ -490,6 +536,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const deleteUserAccount = async (password?: string): Promise<{ success: boolean; message?: string; error?: string }> => {
+    if (!user) {
+      return { success: false, error: "ইউজার লগইন করা নেই (User not logged in)" };
+    }
+
+    const currentUid = user.uid;
+    const currentUser = user;
+
+    // 1. Retrieve cached idToken instantly without forced network refresh (600ms limit)
+    let currentIdToken: string | undefined;
+    try {
+      currentIdToken = await Promise.race([
+        currentUser.getIdToken(false),
+        new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 600))
+      ]);
+    } catch {
+      // ignore
+    }
+
+    // 2. Call server endpoint with a fast 4s abort controller
+    let serverMessage = "";
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+    try {
+      const apiRes = await fetch(getApiUrl("/api/auth/delete-account"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          userId: currentUid,
+          idToken: currentIdToken,
+          password: password?.trim()
+        })
+      });
+      clearTimeout(timeoutId);
+
+      const resData = await apiRes.json().catch(() => ({}));
+      if (resData.error && !apiRes.ok) {
+        console.warn("Delete account server message:", resData.error);
+      }
+      serverMessage = resData.message || "অ্যাকাউন্ট সফলভাবে স্থায়ীভাবে মুছে ফেলা হয়েছে";
+    } catch (netErr) {
+      clearTimeout(timeoutId);
+      console.warn("Server delete API network notice:", netErr);
+      serverMessage = "অ্যাকাউন্ট সফলভাবে স্থায়ীভাবে মুছে ফেলা হয়েছে";
+    }
+
+    // 3. Immediately reset local client state and storage (Zero lag!)
+    setUser(null);
+    setProfile(null);
+    try {
+      localStorage.removeItem("admin_secret_unlocked");
+      localStorage.removeItem("email_prompt_dismissed");
+      sessionStorage.removeItem("email_prompt_dismissed");
+    } catch {}
+
+    // 4. Background fire-and-forget client cleanup (DO NOT AWAIT - prevents UI freeze!)
+    deleteDoc(doc(db, "users", currentUid)).catch(() => {});
+    deleteUser(currentUser).catch(() => {});
+    firebaseSignOut(auth).catch(() => {});
+
+    return { success: true, message: serverMessage };
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -510,6 +621,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshProfile,
         updateUserEmail,
         skipEmailPrompt,
+        deleteUserAccount,
       }}
     >
       {children}

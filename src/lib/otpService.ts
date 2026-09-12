@@ -302,7 +302,8 @@ export const otpService = {
       };
     }
 
-    const computedHash = await sha256Hex(otp.trim() + session.salt);
+    const trimmedOtp = otp.trim();
+    const computedHash = await sha256Hex(trimmedOtp + session.salt);
     if (computedHash !== session.otpHash) {
       session.attempts += 1;
       saveStoredSession(session);

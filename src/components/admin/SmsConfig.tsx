@@ -168,6 +168,7 @@ export const SmsConfig: React.FC<SmsConfigProps> = ({ onBack }) => {
       return;
     }
 
+    setShowPreview(false);
     sendSms(targetNumbers, message, smsType === "all" ? "All Users" : smsType === "selected" ? "Selected Users" : "Manual Number");
   };
 
@@ -433,11 +434,35 @@ export const SmsConfig: React.FC<SmsConfigProps> = ({ onBack }) => {
                 )}
               </div>
 
-              {/* Message Content */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Message Content (Custom)</label>
+              {/* Message Content & Offer Templates */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">অফার বা প্রমোশনাল মেসেজ লিখুন (Offer SMS)</label>
+                  <span className="text-[10px] font-bold text-emerald-600">যে কোনো নাম্বারে পাঠানো যাবে</span>
+                </div>
+
+                {/* Quick Offer Templates */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { label: "🎉 স্পেশাল অফার", text: "আল মায়াদীন বাজারে চলছে আকর্ষণীয় স্পেশাল অফার! আজই অর্ডার করুন এবং উপভোগ করুন সেরা ডিসকাউন্ট। ভিজিট করুন: https://allmayadin.com" },
+                    { label: "🎁 ধামাকা ডিসকাউন্ট", text: "সুসংবাদ! আল মায়াদীন বাজার থেকে আপনার পছন্দের পণ্যে পাচ্ছেন বিশেষ ছাড়ে কেনাকাটার সুযোগ। আজই লুফে নিন!" },
+                    { label: "🚚 ফ্রি ডেলিভারি", text: "আল মায়াদীন বাজার থেকে যেকোনো অর্ডারে পাচ্ছেন ফ্রি হোম ডেলিভারি! আজই আপনার প্রয়োজনীয় পণ্য অর্ডার করুন।" },
+                    { label: "⭐ ক্যাশব্যাক অফার", text: "আল মায়াদীন বাজারে পেমেন্টে থাকছে ইনস্ট্যান্ট ক্যাশব্যাক অফার! আজই আপনার অর্ডার কনফার্ম করুন।" }
+                  ].map((tpl, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setMessage(tpl.text)}
+                      className="p-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 rounded-xl text-left transition-all active:scale-95 group"
+                    >
+                      <p className="text-xs font-black text-amber-900 group-hover:text-amber-950 truncate">{tpl.label}</p>
+                      <p className="text-[9px] text-amber-700/80 line-clamp-1 mt-0.5">{tpl.text}</p>
+                    </button>
+                  ))}
+                </div>
+
                 <textarea 
-                  placeholder="Type your custom message here..."
+                  placeholder="আপনার কাস্টম অফার বা প্রমোশনাল মেসেজ এখানে লিখুন..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/20 h-40 resize-none transition-all"
