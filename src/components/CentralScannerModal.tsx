@@ -1014,8 +1014,8 @@ export const CentralScannerModal: React.FC = () => {
                         <p className="font-bold text-slate-800 mb-2">অর্ডারকৃত পণ্যসমূহ:</p>
                         {scanResult.data.items.map((it, idx) => (
                           <div key={idx} className="flex justify-between text-slate-700 py-1 border-b border-slate-100 last:border-none">
-                            <span>• {it.nameBn} x {it.quantity}</span>
-                            <span className="font-black">৳{it.price * it.quantity}</span>
+                            <span>• {(it as any).nameBn || it.name} x {it.quantity}</span>
+                            <span className="font-black">৳{(it.unitPrice || (it as any).price || 0) * it.quantity}</span>
                           </div>
                         ))}
                         <div className="pt-2 flex justify-between font-black text-emerald-700 text-sm border-t border-slate-200 mt-2">

@@ -231,7 +231,7 @@ export const ProductDetails: React.FC = () => {
           quantity: quantity,
           selectedSize: chosenSize,
           selectedColor: chosenColor,
-          categoryName: product.categoryName || product.category || "আল মায়াদিন বাজার"
+          categoryName: (product as any).categoryName || (product as any).category || "আল মায়াদিন বাজার"
         }
       });
     }, 300);

@@ -49,7 +49,7 @@ export const AuthModal: React.FC = () => {
     quickDemoLogin 
   } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot'>((authModalMode as any) || 'login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot' | 'otp'>((authModalMode as any) || 'login');
   
   // Sync tab when modal opens with a specific mode
   React.useEffect(() => {

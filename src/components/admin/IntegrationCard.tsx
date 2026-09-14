@@ -5,7 +5,7 @@ import { CheckCircle2, XCircle, Settings, Play, Pause, AlertTriangle } from "luc
 interface IntegrationCardProps {
   name: string;
   description: string;
-  status: "not_configured" | "configuration_saved" | "connection_tested" | "active" | "error" | "disabled";
+  status: "not_configured" | "configuration_saved" | "connection_tested" | "active" | "error" | "disabled" | "ACTIVE" | "INACTIVE" | "INITIALIZED" | string;
   onConfigure: () => void;
   onToggle?: (enabled: boolean) => void;
   icon?: React.ReactNode;

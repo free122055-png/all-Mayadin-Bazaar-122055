@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly }) => {
-  const { user, loading, userData } = useAuth();
+  const { user, loading, profile } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -24,7 +24,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminO
     return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
-  if (adminOnly && userData?.role !== 'admin') {
+  if (adminOnly && profile?.role !== 'admin') {
     const secretUnlocked = localStorage.getItem("admin_secret_unlocked") === "true";
     if (!secretUnlocked) {
       // If admin role is required but user is not admin and secret not used, redirect to home

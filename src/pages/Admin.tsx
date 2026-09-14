@@ -1536,7 +1536,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({ icon, label, active, onClick })
     <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
       active ? "bg-[#5842dc] text-white" : "bg-gray-100 text-gray-400"
     }`}>
-      {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
+      {React.cloneElement(icon as React.ReactElement<any>, { className: "w-5 h-5" })}
     </div>
     <span>{label}</span>
   </button>

@@ -22,8 +22,8 @@ const LiveTracking: React.FC<{ order: Order }> = ({ order }) => {
 
     const calculateTime = () => {
       const now = Date.now();
-      const createdTime = order.createdAt?.seconds 
-        ? order.createdAt.seconds * 1000 
+      const createdTime = (order.createdAt as any)?.seconds 
+        ? (order.createdAt as any).seconds * 1000 
         : (typeof order.createdAt === 'number' ? order.createdAt : now);
       
       const totalTime = 40 * 60 * 1000; // 40 minutes in ms

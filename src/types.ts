@@ -4,6 +4,9 @@ export interface UserProfile {
   id: string;
   email: string;
   displayName: string;
+  name?: string;
+  phone?: string;
+  address?: string;
   role: UserRole;
   status: 'active' | 'blocked';
   phoneNumber?: string;
