@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, Search, Maximize, MapPin, ChevronDown, Bell, LayoutGrid, ShieldCheck, Truck, Banknote, Shield, ArrowLeft, ChevronRight, Star, Check, Scan, X, Zap, AlertCircle } from "lucide-react";
+import { Heart, ShoppingCart, Search, Maximize, MapPin, ChevronDown, Bell, LayoutGrid, ShieldCheck, Truck, Banknote, Shield, ArrowLeft, ChevronRight, Star, Check, X, Zap, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { SEO } from "../components/SEO";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { useScanner } from "../context/ScannerContext";
 import { useNotificationContext } from "../context/NotificationContext";
 import { db } from "../lib/firebase";
 import { collection, query, where, getDocs, onSnapshot, orderBy, doc, getDoc, addDoc, serverTimestamp } from "firebase/firestore";
@@ -549,7 +548,6 @@ export const ProductListing: React.FC = () => {
   const navigate = useNavigate();
   const { addItem, totalItems } = useCart();
   const { requireAuth } = useAuth();
-  const { openScanner } = useScanner();
   const { unreadCount } = useNotificationContext();
 
   // Normalize target category id

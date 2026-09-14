@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
-import { useScanner } from "../context/ScannerContext";
 import { SEO } from "../components/SEO";
 import { AnimatedSearchInput } from "../components/AnimatedSearchInput";
 import { db } from "../lib/firebase";
@@ -23,7 +22,6 @@ export const Categories: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearch);
-  const { openScanner } = useScanner();
   const [categoryVisibility, setCategoryVisibility] = useState<Record<string, boolean>>({});
 
   useEffect(() => {

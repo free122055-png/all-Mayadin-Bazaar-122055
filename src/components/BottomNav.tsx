@@ -1,13 +1,11 @@
 import React from "react";
-import { Home, LayoutGrid, ShoppingCart, User, Scan } from "lucide-react";
+import { Home, LayoutGrid, ShoppingCart, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { useScanner } from "../context/ScannerContext";
 
 export const BottomNav: React.FC = () => {
   const location = useLocation();
   const { totalItems } = useCart();
-  const { openScanner } = useScanner();
   const isFoodMarket = location.pathname === "/category/cat1" || location.pathname.startsWith("/food/");
   const isAdmin = location.pathname.startsWith("/admin") || location.pathname.startsWith("/super-admin");
 
@@ -49,24 +47,7 @@ export const BottomNav: React.FC = () => {
           <span className="text-[10px] font-bold">ক্যাটাগরি</span>
         </Link>
 
-        {/* 3. Central Floating Scanner Button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            openScanner();
-          }}
-          className="flex flex-col items-center -mt-6 group active:scale-90 transition-transform duration-75 cursor-pointer"
-          title="সেন্ট্রাল বারকোড ও কিউআর স্ক্যানার"
-          style={{ touchAction: "manipulation" }}
-        >
-          <div className="w-13 h-13 rounded-2xl bg-[#005a36] text-[#22c55e] flex items-center justify-center shadow-lg shadow-[#005a36]/35 border-2 border-white group-hover:scale-105 transition-transform">
-            <Scan className="w-7 h-7 stroke-[2.8]" />
-          </div>
-          <span className="text-[10px] font-black text-[#005a36] mt-0.5">স্ক্যানার</span>
-        </button>
-
-        {/* 4. Cart */}
+        {/* 3. Cart */}
         <Link
           to="/cart"
           className={`flex flex-col items-center gap-0.5 relative min-w-[54px] active:scale-90 transition-transform duration-75 cursor-pointer ${
@@ -88,7 +69,7 @@ export const BottomNav: React.FC = () => {
           <span className="text-[10px] font-bold">কার্ট</span>
         </Link>
 
-        {/* 5. Account */}
+        {/* 4. Account */}
         <Link
           to="/account"
           className={`flex flex-col items-center gap-0.5 relative min-w-[54px] active:scale-90 transition-transform duration-75 cursor-pointer ${

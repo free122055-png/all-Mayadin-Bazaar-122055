@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { Menu, Bell, Scan } from "lucide-react";
+import { Menu, Bell } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { MenuDrawer } from "./MenuDrawer";
-import { useScanner } from "../context/ScannerContext";
 import { useNotificationContext } from "../context/NotificationContext";
 import { AnimatedBrandLogo } from "./AnimatedBrandLogo";
 import { AnimatedSearchInput } from "./AnimatedSearchInput";
@@ -10,7 +9,6 @@ import { AnimatedSearchInput } from "./AnimatedSearchInput";
 export const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { openScanner } = useScanner();
   const { unreadCount } = useNotificationContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,7 +72,7 @@ export const Header: React.FC = () => {
             </button>
           </div>
 
-          {/* Search Bar with Integrated Scanner */}
+          {/* Search Bar */}
           <div className="relative flex items-center">
             <AnimatedSearchInput
               value={searchTerm}
@@ -83,16 +81,8 @@ export const Header: React.FC = () => {
               category="general"
               onClear={() => setSearchTerm("")}
               showClearButton={false}
-              inputClassName={`rounded-full pl-11 pr-14 text-sm font-medium shadow-md ${!isHome ? 'py-2.5' : 'py-3'}`}
+              inputClassName={`rounded-full pl-11 pr-4 text-sm font-medium shadow-md ${!isHome ? 'py-2.5' : 'py-3'}`}
             />
-            <button 
-              type="button"
-              onClick={() => openScanner()}
-              className={`absolute right-1.5 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#054429] hover:bg-[#065332] active:scale-95 rounded-2xl text-[#4ade80] shadow-sm flex items-center justify-center transition-all border border-emerald-600/30 z-20 ${!isHome ? 'w-8 h-8 rounded-xl' : ''}`}
-              title="সেন্ট্রাল বারকোড ও কিউআর স্ক্যানার"
-            >
-              <Scan className={`${!isHome ? 'w-4 h-4' : 'w-5 h-5'} stroke-[2.5]`} />
-            </button>
           </div>
         </div>
       </header>

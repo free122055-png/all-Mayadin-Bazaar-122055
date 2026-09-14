@@ -4,9 +4,7 @@ import { Header } from "./components/Header";
 import { BottomNav } from "./components/BottomNav";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { ScannerProvider } from "./context/ScannerContext";
 import { AuthModal } from "./components/AuthModal";
-import { CentralScannerModal } from "./components/CentralScannerModal";
 import { NotificationInitializer } from "./components/NotificationInitializer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DeepLinkHandler } from "./components/DeepLinkHandler";
@@ -214,7 +212,6 @@ function AppLayout() {
       <BottomNav />
       <DeepLinkHandler />
       <AuthModal />
-      <CentralScannerModal />
     </div>
   );
 }
@@ -226,9 +223,7 @@ export default function App() {
         <NotificationProvider>
           <NotificationInitializer />
           <CartProvider>
-            <ScannerProvider>
-              <AppLayout />
-            </ScannerProvider>
+            <AppLayout />
           </CartProvider>
         </NotificationProvider>
       </AuthProvider>
