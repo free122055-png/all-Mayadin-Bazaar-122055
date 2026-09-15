@@ -22,14 +22,14 @@ export const PERMANENT_IMGBB_API_KEY = typeof process !== "undefined" && process
 export const NOTIFICATION_BANNER_PRESETS = [
   {
     label: "🌾 বাসমতি চাল স্পেশাল (আইডি: 458)",
-    title: "আল মায়াদিন স্পেশাল বাসমতি চাল মেগা অফার!",
+    title: "All MAYADIN FASHION স্পেশাল বাসমতি চাল মেগা অফার!",
     message: "প্রিমিয়াম বাসমতি চাল ৫ কেজিতে পাচ্ছেন ১৩০ টাকা ছাড়! স্টক সীমিত, এখনই অর্ডার করুন।",
     imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&q=80",
     productId: "458"
   },
   {
     label: "🛍️ মেগা গ্রোসারি ডিসকাউন্ট",
-    title: "আল মায়াদিন বাজার: আজকের সেরা গ্রোসারি অফার!",
+    title: "All MAYADIN FASHION: আজকের সেরা গ্রোসারি অফার!",
     message: "দৈনন্দিন বাজার সদাইয়ে আজই উপভোগ করুন আকর্ষণীয় ছাড় ও দ্রুত হোম ডেলিভারি।",
     imageUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80",
     productId: ""
@@ -37,7 +37,7 @@ export const NOTIFICATION_BANNER_PRESETS = [
   {
     label: "🥬 তাজা শাকসবজি ও ফলমূল",
     title: "ফার্ম ফ্রেশ তাজা সবজি ও প্রিমিয়াম ফল পৌঁছে যাবে ঘরে!",
-    message: "শতভাগ সতেজ ও ফরমালিনমুক্ত শাকসবজি অর্ডার করুন আল মায়াদিন বাজারে।",
+    message: "শতভাগ সতেজ ও ফরমালিনমুক্ত শাকসবজি অর্ডার করুন All MAYADIN FASHIONে।",
     imageUrl: "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=800&q=80",
     productId: ""
   },
@@ -65,7 +65,7 @@ export const OneSignalConfig: React.FC<OneSignalConfigProps> = ({ onBack, preSel
     imgbbApiKey: PERMANENT_IMGBB_API_KEY
   });
   const [testPayload, setTestPayload] = useState({
-    title: "আল মায়াদিন স্পেশাল বাসমতি চাল মেগা অফার!",
+    title: "All MAYADIN FASHION স্পেশাল বাসমতি চাল মেগা অফার!",
     message: "প্রিমিয়াম বাসমতি চাল ৫ কেজিতে পাচ্ছেন ১৩০ টাকা ছাড়! স্টক সীমিত, এখনই অর্ডার করুন।",
     imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&q=80",
     productId: "458"
@@ -208,7 +208,7 @@ export const OneSignalConfig: React.FC<OneSignalConfigProps> = ({ onBack, preSel
       if (granted) {
         setDeviceSubscribed(true);
         showToast("আপনার ডিভাইসটিতে নোটিফিকেশন সফলভাবে চালু হয়েছে!", "success");
-        notificationService.triggerLocalTestNotification("আল-মায়াদিন বাজার", "অভিনন্দন! আপনার ফোনে নোটিফিকেশন সফলভাবে সক্রিয় হয়েছে।");
+        notificationService.triggerLocalTestNotification("আল-All MAYADIN FASHION", "অভিনন্দন! আপনার ফোনে নোটিফিকেশন সফলভাবে সক্রিয় হয়েছে।");
         fetchStats();
       } else {
         showToast("ব্রাউজার নোটিফিকেশন অনুমোদন (Allow) করুন।", "error");
@@ -224,7 +224,7 @@ export const OneSignalConfig: React.FC<OneSignalConfigProps> = ({ onBack, preSel
     if (typeof window !== "undefined" && "Notification" in window) {
       if (Notification.permission === "granted") {
         notificationService.triggerLocalTestNotification(
-          "আল-মায়াদিন বাজার",
+          "আল-All MAYADIN FASHION",
           "এটি আপনার বর্তমান ডিভাইসে সফল টেস্ট নোটিফিকেশন! সাউন্ড ও ভাইব্রেশন সহ কাজ করছে।"
         );
         showToast("আপনার বর্তমান ডিভাইসে টেস্ট নোটিফিকেশন পাঠানো হয়েছে!", "success");
@@ -1196,7 +1196,7 @@ export const OneSignalConfig: React.FC<OneSignalConfigProps> = ({ onBack, preSel
                     গ্রাহকের ফোনে যেভাবে নোটিফিকেশন আসবে (Live Android Mockup)
                   </label>
                   <span className="text-[10px] font-black text-[#004b23] bg-[#004b23]/10 px-2 py-0.5 rounded-full">
-                    AL MAYADIN BAZAR
+                    All MAYADIN FASHION
                   </span>
                 </div>
 
@@ -1210,7 +1210,7 @@ export const OneSignalConfig: React.FC<OneSignalConfigProps> = ({ onBack, preSel
                         alt="Logo" 
                         className="w-5 h-5 rounded-full object-cover ring-1 ring-emerald-500" 
                       />
-                      <span className="font-bold text-gray-200 text-xs">আল মায়াদিন বাজার (Al-Mayadin Bazar)</span>
+                      <span className="font-bold text-gray-200 text-xs">All MAYADIN FASHION (Al-Mayadin Bazar)</span>
                       <span className="text-gray-400 text-[10px]">এখন</span>
                       <Bell className="w-3 h-3 text-emerald-400" />
                     </div>

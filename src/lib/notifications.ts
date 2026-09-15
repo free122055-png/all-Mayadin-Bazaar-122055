@@ -143,7 +143,7 @@ class NotificationService {
       // 1. Direct browser Notification API check
       if (typeof window !== "undefined" && "Notification" in window) {
         if (Notification.permission === "granted") {
-          this.triggerLocalTestNotification("আল-মায়াদিন বাজার", "আপনার ডিভাইসে নোটিফিকেশন সক্রিয় আছে।");
+          this.triggerLocalTestNotification("আল-All MAYADIN FASHION", "আপনার ডিভাইসে নোটিফিকেশন সক্রিয় আছে।");
           return true;
         } else if (Notification.permission === "denied") {
           return false;
@@ -158,7 +158,7 @@ class NotificationService {
             )
           ]);
           if (res === "granted") {
-            this.triggerLocalTestNotification("আল-মায়াদিন বাজার", "অভিনন্দন! আপনার ফোনে নোটিফিকেশন সফলভাবে চালু হয়েছে।");
+            this.triggerLocalTestNotification("আল-All MAYADIN FASHION", "অভিনন্দন! আপনার ফোনে নোটিফিকেশন সফলভাবে চালু হয়েছে।");
             return true;
           }
         } catch {

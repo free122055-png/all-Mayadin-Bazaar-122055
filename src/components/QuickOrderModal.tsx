@@ -183,7 +183,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
 
       // Try automated SMS notification to customer
       try {
-        const smsText = `আল মায়াদিন বাজার: আপনার অর্ডার #${orderNumber} সফল হয়েছে! মোট: ৳${grandTotal} (${paymentMethod === 'cod' ? 'ক্যাশ অন ডেলিভারি' : paymentMethod.toUpperCase()})। ধন্যবাদ!`;
+        const smsText = `All MAYADIN FASHION: আপনার অর্ডার #${orderNumber} সফল হয়েছে! মোট: ৳${grandTotal} (${paymentMethod === 'cod' ? 'ক্যাশ অন ডেলিভারি' : paymentMethod.toUpperCase()})। ধন্যবাদ!`;
         await sendSms(cleanPhone, smsText, "Direct Order Confirmation", "Direct Link System");
       } catch (smsErr) {
         console.warn("[QuickOrder] SMS trigger notice:", smsErr);

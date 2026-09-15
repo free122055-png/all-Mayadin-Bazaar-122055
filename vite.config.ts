@@ -5,10 +5,14 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    root: __dirname,
     plugins: [react(), tailwindcss()],
     build: {
       outDir: 'dist',
       emptyOutDir: true,
+      rollupOptions: {
+        input: path.resolve(__dirname, 'index.html'),
+      },
     },
     resolve: {
       alias: {

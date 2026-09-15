@@ -10,7 +10,7 @@ interface BrandVariant {
 const VARIANTS: BrandVariant[] = [
   { top: "ALL", main: "MAYADIN", sub: "BAZAR" },
   { top: "অল", main: "মায়াদিন", sub: "বাজার" },
-  { top: "সেরা", main: "আল মায়াদিন", sub: "সুপারশপ" },
+  { top: "সেরা", main: "All MAYADIN FASHION", sub: "সুপারশপ" },
   { top: "ALL", main: "MAYADIN", sub: "BAZAR" },
 ];
 
@@ -67,7 +67,7 @@ export const AnimatedBrandLogo: React.FC<{ isCompact?: boolean }> = ({ isCompact
       className={`flex flex-col items-center group transition-all duration-300 select-none ${
         isCompact ? "scale-90" : ""
       }`}
-      title="অল মায়াদিন বাজার"
+      title="All MAYADIN FASHION"
     >
       {/* Top Tag: ALL / অল + Shopping Bag Icon */}
       <div className="flex items-center gap-1 mb-[-2px]">
@@ -92,7 +92,7 @@ export const AnimatedBrandLogo: React.FC<{ isCompact?: boolean }> = ({ isCompact
         </div>
       </div>
 
-      {/* Main Dynamic Typography Heading (MAYADIN / মায়াদিন / আল মায়াদিন) */}
+      {/* Main Dynamic Typography Heading (MAYADIN / মায়াদিন / All MAYADIN FASHION) */}
       <div className="flex items-center justify-center min-h-[28px] sm:min-h-[32px]">
         <span 
           className={`${

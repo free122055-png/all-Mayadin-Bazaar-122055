@@ -257,7 +257,7 @@ export const AuthModal: React.FC = () => {
               </svg>
             </div>
             <div>
-              <span className="text-xs font-black tracking-widest text-[#ffb703] block uppercase">আল মায়াদিন বাজার</span>
+              <span className="text-xs font-black tracking-widest text-[#ffb703] block uppercase">All MAYADIN FASHION</span>
               <span className="text-base font-black tracking-tight text-white block">নিরাপদ ও প্রিমিয়াম ই-কমার্স</span>
             </div>
           </div>

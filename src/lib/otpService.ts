@@ -1,5 +1,5 @@
 /**
- * OTP Verification Client Service for Al Mayadin Bazar
+ * OTP Verification Client Service for All MAYADIN FASHION
  * High-Reliability Standalone & Hybrid Engine
  */
 
@@ -191,7 +191,7 @@ export const otpService = {
     const salt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const otpHash = await sha256Hex(otp + salt);
 
-    const messageContent = `Your Al Mayadin Bazar verification code is ${otp}. Valid for 5 minutes. Please do not share this OTP.`;
+    const messageContent = `Your All MAYADIN FASHION verification code is ${otp}. Valid for 5 minutes. Please do not share this OTP.`;
 
     try {
       const smsResult = await sendSms(formatted, messageContent, "OTP Verification", "System");

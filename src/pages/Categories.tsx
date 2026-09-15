@@ -44,7 +44,7 @@ export const Categories: React.FC = () => {
 
   return (
     <div className="px-4 pt-10 sm:pt-8 pb-24 space-y-4 max-w-lg mx-auto md:max-w-none w-full overflow-x-hidden">
-      <SEO title="সকল ক্যাটাগরি - আল মায়াদিন বাজার" description="All Mayadin Bazar Categories" />
+      <SEO title="সকল ক্যাটাগরি - All MAYADIN FASHION" description="All Mayadin Bazar Categories" />
 
       {/* Mobile-Friendly Header with Safe Area Space */}
       <div className="flex items-center justify-between pt-1">

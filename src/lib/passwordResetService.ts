@@ -277,7 +277,7 @@ export const passwordResetService = {
     const otpHash = await sha256Hex(randomOtp + salt);
 
     // Prepare message using standard format
-    const messageContent = `Your Al Mayadin Bazar password reset code is ${randomOtp}. Valid for 5 minutes. Do not share this OTP.`;
+    const messageContent = `Your All MAYADIN FASHION password reset code is ${randomOtp}. Valid for 5 minutes. Do not share this OTP.`;
 
     try {
       // Send SMS via existing configured SAS Bulk SMS Gateway

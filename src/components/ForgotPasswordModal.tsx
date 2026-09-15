@@ -44,7 +44,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   const getWhatsAppLink = () => {
     const parsed = parseBangladeshiPhone(phoneNumber);
     const targetPhone = parsed.isValid ? parsed.formatted : (phoneNumber.trim() || "আমার নম্বর");
-    const message = `আসসালামু আলাইকুম, আমি আল মায়াদীন বাজার (AL MAYADIN BAZAAR) অ্যাপে আমার অ্যাকাউন্টের পাসওয়ার্ড ভুলে গেছি।\n\nআমার রেজিস্টার্ড মোবাইল নম্বর: ${targetPhone}\n\nঅনুগ্রহ করে আমার অ্যাকাউন্ট ভেরিফাই করে পাসওয়ার্ড পুনরুদ্ধার করতে সহায়তা করুন। ধন্যবাদ!`;
+    const message = `আসসালামু আলাইকুম, আমি আল মায়াদীন বাজার (All MAYADIN FASHION) অ্যাপে আমার অ্যাকাউন্টের পাসওয়ার্ড ভুলে গেছি।\n\nআমার রেজিস্টার্ড মোবাইল নম্বর: ${targetPhone}\n\nঅনুগ্রহ করে আমার অ্যাকাউন্ট ভেরিফাই করে পাসওয়ার্ড পুনরুদ্ধার করতে সহায়তা করুন। ধন্যবাদ!`;
     return `https://wa.me/${WHATSAPP_INTL}?text=${encodeURIComponent(message)}`;
   };
 

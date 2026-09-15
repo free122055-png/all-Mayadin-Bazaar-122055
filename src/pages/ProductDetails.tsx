@@ -231,7 +231,7 @@ export const ProductDetails: React.FC = () => {
           quantity: quantity,
           selectedSize: chosenSize,
           selectedColor: chosenColor,
-          categoryName: (product as any).categoryName || (product as any).category || "আল মায়াদিন বাজার"
+          categoryName: (product as any).categoryName || (product as any).category || "All MAYADIN FASHION"
         }
       });
     }, 300);
@@ -317,8 +317,8 @@ export const ProductDetails: React.FC = () => {
     <div className={`space-y-5 pb-32 relative max-w-4xl mx-auto ${isFood ? "-mx-4 -mt-4" : ""}`}>
       {/* Dynamic SEO Meta */}
       <SEO
-        title={`${product.nameBn || product.name} - ৳${currentPrice} | AL MAYADIN BAZAR`}
-        description={product.description || `${product.nameBn} - সুলভ মূল্যে আল মায়াদিন বাজারে অর্ডার করুন।`}
+        title={`${product.nameBn || product.name} - ৳${currentPrice} | All MAYADIN FASHION`}
+        description={product.description || `${product.nameBn} - সুলভ মূল্যে All MAYADIN FASHIONে অর্ডার করুন।`}
         image={imagesList[0]}
       />
 
@@ -670,7 +670,7 @@ export const ProductDetails: React.FC = () => {
             পণ্যের বিস্তারিত বিবরণ (Full Details)
           </h3>
           <p className="text-xs sm:text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-            {product.description || "আল মায়াদিন বাজারের প্রিমিয়াম কোয়ালিটি সম্পন্ন পণ্য। ১০০% সঠিক ও আসল মানের নিশ্চয়তা সহ সরবরাহ করা হয়।"}
+            {product.description || "All MAYADIN FASHIONের প্রিমিয়াম কোয়ালিটি সম্পন্ন পণ্য। ১০০% সঠিক ও আসল মানের নিশ্চয়তা সহ সরবরাহ করা হয়।"}
           </p>
           
           <div className="grid grid-cols-2 gap-3 pt-3">

@@ -225,7 +225,7 @@ export const ShareProductModal: React.FC<ShareProductModalProps> = ({
                   <img src={qrImageUrl} alt="Product QR Code" className="w-40 h-40 object-contain" />
                 </div>
                 <p className="text-[11px] font-mono text-emerald-800 font-bold">{deepLink}</p>
-                <p className="text-[11px] text-gray-500 font-bold">স্ক্যান করলে সরাসরি আল মায়াদিন বাজার অ্যাপ ওপেন হবে</p>
+                <p className="text-[11px] text-gray-500 font-bold">স্ক্যান করলে সরাসরি All MAYADIN FASHION অ্যাপ ওপেন হবে</p>
               </motion.div>
             )}
           </div>

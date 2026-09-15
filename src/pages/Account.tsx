@@ -384,7 +384,7 @@ export const Account: React.FC = () => {
       </div>
 
       <div className="text-center text-[10px] text-gray-400 font-medium pb-6">
-        App Version 8.0 • AL MAYADIN BAZAAR
+        App Version 8.0 • All MAYADIN FASHION
       </div>
 
       {/* Delete Account Modal */}

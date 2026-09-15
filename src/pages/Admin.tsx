@@ -1242,112 +1242,113 @@ export const Admin: React.FC = () => {
             )}
 
             {/* 4.5. সাইজ ও ভ্যারিয়েন্ট ব্যবস্থাপনা (Sizes / Variants for Clothing & Products) */}
-            <div className="space-y-3 p-4 bg-gradient-to-br from-purple-50/70 to-indigo-50/40 rounded-2xl border border-purple-100/90">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                <div>
-                  <label className="text-xs sm:text-sm font-black text-gray-900 flex items-center gap-1.5">
-                    <span className="p-1 bg-[#5842dc]/10 text-[#5842dc] rounded-lg">
-                      <Tag className="w-4 h-4" />
+            {(selectedCategory === "cat3" || selectedCategory === "clothing") && (
+              <div className="space-y-3 p-4 bg-gradient-to-br from-purple-50/70 to-indigo-50/40 rounded-2xl border border-purple-100/90">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                  <div>
+                    <label className="text-xs sm:text-sm font-black text-gray-900 flex items-center gap-1.5">
+                      <span className="p-1 bg-[#5842dc]/10 text-[#5842dc] rounded-lg">
+                        <Tag className="w-4 h-4" />
+                      </span>
+                      প্রোডাক্টের সাইজ / ভ্যারিয়েন্ট (Sizes)
+                    </label>
+                    <p className="text-[11px] text-gray-500 font-medium">
+                      কাপড়, পোশাক বা পণ্যের সাইজ যোগ করুন যেন কাস্টমার সাইজ সিলেক্ট করে অর্ডার করতে পারে।
+                    </p>
+                  </div>
+                  {productSizes.length > 0 && (
+                    <span className="text-[10px] font-black text-[#5842dc] bg-white px-2.5 py-1 rounded-full border border-purple-200 shrink-0 w-fit">
+                      মোট {productSizes.length}টি সাইজ সিলেক্টেড
                     </span>
-                    প্রোডাক্টের সাইজ / ভ্যারিয়েন্ট (Sizes)
-                  </label>
-                  <p className="text-[11px] text-gray-500 font-medium">
-                    কাপড়, পোশাক বা পণ্যের সাইজ যোগ করুন যেন কাস্টমার সাইজ সিলেক্ট করে অর্ডার করতে পারে।
-                  </p>
+                  )}
                 </div>
-                {productSizes.length > 0 && (
-                  <span className="text-[10px] font-black text-[#5842dc] bg-white px-2.5 py-1 rounded-full border border-purple-200 shrink-0 w-fit">
-                    মোট {productSizes.length}টি সাইজ সিলেক্টেড
-                  </span>
-                )}
-              </div>
 
-              {/* Quick Preset Buttons */}
-              <div className="space-y-2 pt-1">
-                <span className="text-[11px] font-bold text-gray-700 block">⚡ দ্রুত সাইজ সেট যোগ করুন (Quick Presets):</span>
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleTogglePresetSizes(["S", "M", "L", "XL", "XXL"])}
-                    className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
-                  >
-                    👕 শার্ট/টি-শার্ট (S, M, L, XL, XXL)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleTogglePresetSizes(["38", "40", "42", "44"])}
-                    className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
-                  >
-                    👔 পাঞ্জাবি/প্যান্ট (38, 40, 42, 44)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleTogglePresetSizes(["52", "54", "56", "Free Size"])}
-                    className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
-                  >
-                    👗 বোরকা/শাড়ি (52, 54, 56, Free Size)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleTogglePresetSizes(["39", "40", "41", "42", "43"])}
-                    className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
-                  >
-                    👟 জুতা (39, 40, 41, 42, 43)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleTogglePresetSizes(["500g", "1kg", "2kg", "5kg"])}
-                    className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
-                  >
-                    🌾 খাদ্য ওজন (500g, 1kg, 2kg, 5kg)
-                  </button>
+                {/* Quick Preset Buttons */}
+                <div className="space-y-2 pt-1">
+                  <span className="text-[11px] font-bold text-gray-700 block">⚡ দ্রুত সাইজ সেট যোগ করুন (Quick Presets):</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePresetSizes(["S", "M", "L", "XL", "XXL"])}
+                      className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
+                    >
+                      👕 শার্ট/টি-শার্ট (S, M, L, XL, XXL)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePresetSizes(["38", "40", "42", "44"])}
+                      className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
+                    >
+                      👔 পাঞ্জাবি/প্যান্ট (38, 40, 42, 44)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePresetSizes(["52", "54", "56", "Free Size"])}
+                      className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
+                    >
+                      👗 বোরকা/শাড়ি (52, 54, 56, Free Size)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePresetSizes(["39", "40", "41", "42", "43"])}
+                      className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
+                    >
+                      👟 জুতা (39, 40, 41, 42, 43)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePresetSizes(["500g", "1kg", "2kg", "5kg"])}
+                      className="px-2.5 py-1 bg-white hover:bg-purple-100/80 border border-purple-200 text-[#5842dc] rounded-xl text-[11px] font-bold transition-all active:scale-95 shadow-2xs"
+                    >
+                      🌾 খাদ্য ওজন (500g, 1kg, 2kg, 5kg)
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Custom Size Input */}
-              <div className="flex gap-2 pt-1">
-                <input
-                  type="text"
-                  value={customSizeInput}
-                  onChange={(e) => setCustomSizeInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === ",") {
-                      e.preventDefault();
+                {/* Custom Size Input */}
+                <div className="flex gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={customSizeInput}
+                    onChange={(e) => setCustomSizeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                        e.preventDefault();
+                        if (customSizeInput.trim()) {
+                          handleAddSize(customSizeInput);
+                          setCustomSizeInput("");
+                        }
+                      }
+                    }}
+                    placeholder="অন্যান্য কাস্টম সাইজ লিখুন (যেমন: 46 বা 3XL)..."
+                    className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5842dc]/40"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
                       if (customSizeInput.trim()) {
                         handleAddSize(customSizeInput);
                         setCustomSizeInput("");
                       }
-                    }
-                  }}
-                  placeholder="অন্যান্য কাস্টম সাইজ লিখুন (যেমন: 46 বা 3XL)..."
-                  className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5842dc]/40"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (customSizeInput.trim()) {
-                      handleAddSize(customSizeInput);
-                      setCustomSizeInput("");
-                    }
-                  }}
-                  className="px-4 py-2 bg-[#5842dc] hover:bg-[#4b35cf] text-white rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all shadow-2xs"
-                >
-                  যোগ করুন
-                </button>
-              </div>
+                    }}
+                    className="px-4 py-2 bg-[#5842dc] hover:bg-[#4b35cf] text-white rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all shadow-2xs"
+                  >
+                    যোগ করুন
+                  </button>
+                </div>
 
-              {/* Selected Sizes Chips */}
-              {productSizes.length > 0 ? (
-                <div className="pt-1">
-                  <span className="text-[11px] font-bold text-gray-600 block mb-1.5">নির্বাচিত সাইজসমূহ (কাস্টমার দেখতে পাবে):</span>
-                  <div className="flex flex-wrap gap-2">
-                    {productSizes.map((sz, idx) => (
-                      <div
-                        key={idx}
-                        className="inline-flex items-center gap-1.5 bg-white border border-purple-200 text-[#5842dc] px-3 py-1.5 rounded-xl text-xs font-black shadow-2xs group"
-                      >
-                        <span>{sz}</span>
-                        <button
+                {/* Selected Sizes Chips */}
+                {productSizes.length > 0 ? (
+                  <div className="pt-1">
+                    <span className="text-[11px] font-bold text-gray-600 block mb-1.5">নির্বাচিত সাইজসমূহ (কাস্টমার দেখতে পাবে):</span>
+                    <div className="flex flex-wrap gap-2">
+                      {productSizes.map((sz, idx) => (
+                        <div
+                          key={idx}
+                          className="inline-flex items-center gap-1.5 bg-white border border-purple-200 text-[#5842dc] px-3 py-1.5 rounded-xl text-xs font-black shadow-2xs group"
+                        >
+                          <span>{sz}</span>
+                          <button
                           type="button"
                           onClick={() => handleRemoveSize(sz)}
                           className="text-gray-400 hover:text-red-500 rounded-full p-0.5 hover:bg-red-50 transition-colors"
@@ -1374,6 +1375,7 @@ export const Admin: React.FC = () => {
                 </div>
               )}
             </div>
+            )}
 
             {/* 5. প্রোডাক্টের বিবরণ */}
             <div className="space-y-1.5">

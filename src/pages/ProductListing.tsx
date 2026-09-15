@@ -673,6 +673,13 @@ export const ProductListing: React.FC = () => {
       const name = product.nameBn || product.name || product.title || "পণ্য";
       const image = product.image || (product.images && product.images[0]) || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80";
       const productId = String(product.id || name);
+      
+      let defaultSize = undefined;
+      if (product.sizes && product.sizes.length > 0) {
+        defaultSize = product.sizes[0];
+      } else if (product.categoryId === "cat3" || (product.nameBn && /শার্ট|পাঞ্জাবি|টি-শার্ট|পোশাক|বোরকা|শাড়ি|কাপড়|জিন্স|প্যান্ট|জামা/i.test(product.nameBn))) {
+        defaultSize = "M"; // fallback
+      }
 
       addItem({
         productId,
@@ -681,6 +688,7 @@ export const ProductListing: React.FC = () => {
         quantity: 1,
         image,
         weight: product.weight || product.unit || "",
+        selectedSize: defaultSize
       });
 
       setToastMessage(name);
@@ -695,8 +703,28 @@ export const ProductListing: React.FC = () => {
       e.stopPropagation();
       e.preventDefault();
     }
-    const productId = product.id || product.numericId || "1";
-    navigate(`/product/${productId}`);
+    const imagesList = product.images && product.images.length > 0 ? product.images : [product.image || ""];
+    
+    // Determine default size if it's clothing and has sizes
+    let defaultSize = "";
+    if (product.sizes && product.sizes.length > 0) {
+      defaultSize = product.sizes[0];
+    } else if (product.categoryId === "cat3" || (product.nameBn && /শার্ট|পাঞ্জাবি|টি-শার্ট|পোশাক|বোরকা|শাড়ি|কাপড়|জিন্স|প্যান্ট|জামা/i.test(product.nameBn))) {
+      defaultSize = "M"; // fallback
+    }
+
+    navigate("/food/buy", {
+      state: {
+        selectedProduct: {
+          ...product,
+          images: imagesList,
+          image: imagesList[0]
+        },
+        quantity: 1,
+        selectedSize: defaultSize || undefined,
+        categoryName: product.category || category?.title || "All MAYADIN FASHION"
+      }
+    });
   };
 
   const isFood = category?.title?.includes("খাদ্য") || categoryId === "cat1" || categoryId === "food";
@@ -1090,7 +1118,7 @@ export const ProductListing: React.FC = () => {
   if (isCategoryDisabled) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
-        <SEO title="সেকশন বন্ধ - আল মায়াদিন বাজার" description="Category currently unavailable" />
+        <SEO title="সেকশন বন্ধ - All MAYADIN FASHION" description="Category currently unavailable" />
         <div className="w-20 h-20 bg-rose-100 text-rose-700 rounded-3xl flex items-center justify-center mb-4 shadow-sm">
           <AlertCircle className="w-10 h-10" />
         </div>
@@ -1247,19 +1275,27 @@ export const ProductListing: React.FC = () => {
                               <Star className="w-3.5 h-3.5 fill-[#fbbf24] text-[#fbbf24]" />
                               <span className="text-gray-600 text-[10px] font-bold">{product.rating || "4.8"} ({product.reviews || "10"})</span>
                            </div>
-                           <div className="flex items-center justify-between mt-auto">
-                              <div>
-                                <div className="text-gray-900 text-[15px] font-black">৳ {Number(product.discountPrice || product.price).toLocaleString('bn-BD')}</div>
-                                {product.discountPrice && product.discountPrice < product.price && (
-                                  <div className="text-gray-400 text-[11px] font-bold line-through">৳ {Number(product.price).toLocaleString('bn-BD')}</div>
-                                )}
+                           <div className="flex flex-col gap-2 mt-auto">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="text-gray-900 text-[15px] font-black">৳ {Number(product.discountPrice || product.price).toLocaleString('bn-BD')}</div>
+                                  {product.discountPrice && product.discountPrice < product.price && (
+                                    <div className="text-gray-400 text-[11px] font-bold line-through">৳ {Number(product.price).toLocaleString('bn-BD')}</div>
+                                  )}
+                                </div>
+                                <button 
+                                   onClick={(e) => handleAddToCart(product, e)}
+                                   className="w-8 h-8 flex items-center justify-center bg-[#0f172a] text-white rounded-full hover:bg-blue-600 active:scale-90 transition-all shadow-sm shrink-0"
+                                   title="কার্টে যোগ করুন"
+                                >
+                                   <ShoppingCart className="w-4 h-4" />
+                                </button>
                               </div>
                               <button 
-                                 onClick={(e) => handleAddToCart(product, e)}
-                                 className="w-8 h-8 flex items-center justify-center bg-[#0f172a] text-white rounded-full hover:bg-blue-600 active:scale-90 transition-all shadow-sm"
-                                 title="কার্টে যোগ করুন"
+                                onClick={(e) => handleBuyNow(product, e)}
+                                className="w-full bg-[#3b82f6] text-white text-[11px] font-black py-2 rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-1 shadow-sm mt-0.5"
                               >
-                                 <ShoppingCart className="w-4 h-4" />
+                                <Zap className="w-3.5 h-3.5 fill-white" /> কিনুন
                               </button>
                            </div>
                         </div>
@@ -1332,19 +1368,27 @@ export const ProductListing: React.FC = () => {
                               <Star className="w-3.5 h-3.5 fill-[#fbbf24] text-[#fbbf24]" />
                               <span className="text-gray-600 text-[10px] font-bold">{product.rating || "4.8"} ({product.reviews || "10"})</span>
                            </div>
-                           <div className="flex items-center justify-between mt-auto">
-                              <div>
-                                <div className="text-gray-900 text-[15px] font-black">৳ {Number(product.discountPrice || product.price).toLocaleString('bn-BD')}</div>
-                                {product.discountPrice && product.discountPrice < product.price && (
-                                  <div className="text-gray-400 text-[11px] font-bold line-through">৳ {Number(product.price).toLocaleString('bn-BD')}</div>
-                                )}
+                           <div className="flex flex-col gap-2 mt-auto">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="text-gray-900 text-[15px] font-black">৳ {Number(product.discountPrice || product.price).toLocaleString('bn-BD')}</div>
+                                  {product.discountPrice && product.discountPrice < product.price && (
+                                    <div className="text-gray-400 text-[11px] font-bold line-through">৳ {Number(product.price).toLocaleString('bn-BD')}</div>
+                                  )}
+                                </div>
+                                <button 
+                                   onClick={(e) => handleAddToCart(product, e)}
+                                   className="w-8 h-8 flex items-center justify-center bg-[#0f172a] text-white rounded-full hover:bg-blue-600 active:scale-90 transition-all shadow-sm shrink-0"
+                                   title="কার্টে যোগ করুন"
+                                >
+                                   <ShoppingCart className="w-4 h-4" />
+                                </button>
                               </div>
                               <button 
-                                 onClick={(e) => handleAddToCart(product, e)}
-                                 className="w-8 h-8 flex items-center justify-center bg-[#0f172a] text-white rounded-full hover:bg-blue-600 active:scale-90 transition-all shadow-sm"
-                                 title="কার্টে যোগ করুন"
+                                onClick={(e) => handleBuyNow(product, e)}
+                                className="w-full bg-[#3b82f6] text-white text-[11px] font-black py-2 rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-1 shadow-sm mt-0.5"
                               >
-                                 <ShoppingCart className="w-4 h-4" />
+                                <Zap className="w-3.5 h-3.5 fill-white" /> কিনুন
                               </button>
                            </div>
                         </div>

@@ -15,6 +15,7 @@ import { collection, addDoc, doc, getDoc, onSnapshot, serverTimestamp } from "fi
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { User, Compass } from "lucide-react";
+import { ensureMultiImages } from "../lib/imageUtils";
 
 interface OrderItem {
   id: string;
@@ -25,7 +26,10 @@ interface OrderItem {
   unitWeightKg: number;
   pricePerUnit: number;
   image: string;
+  images?: string[];
   quantity: number;
+  selectedSize?: string;
+  selectedColor?: string;
 }
 
 export const FoodBuyFlow: React.FC = () => {
@@ -35,7 +39,7 @@ export const FoodBuyFlow: React.FC = () => {
   const { items: globalCartItems } = useCart();
   const { requireAuth, user, profile } = useAuth();
 
-  const categoryName = (location.state as any)?.categoryName || "আল মায়াদিন বাজার";
+  const categoryName = (location.state as any)?.categoryName || "All MAYADIN FASHION";
   const [isFoodCategoryDisabled, setIsFoodCategoryDisabled] = useState(false);
 
   useEffect(() => {
@@ -62,31 +66,39 @@ export const FoodBuyFlow: React.FC = () => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>(() => {
     const passedProduct = (location.state as any)?.selectedProduct;
     if (passedProduct) {
-      const matched = defaultFoodCatalog.find(p => p.id === passedProduct.id || p.nameBn === passedProduct.nameBn);
+      const matched = defaultFoodCatalog.find(p => p.id === passedProduct.id || p.nameBn === passedProduct.nameBn) as any;
+      const imagesList = ensureMultiImages(passedProduct);
       return [{
         id: matched?.id || passedProduct.id || "food-1",
-        nameBn: matched?.nameBn || passedProduct.nameBn || passedProduct.name || "খাদ্য পণ্য",
-        brand: matched?.brand || "তাজা বাজার",
-        unit: matched?.unit || "কেজি",
+        nameBn: matched?.nameBn || passedProduct.nameBn || passedProduct.name || "পণ্য",
+        brand: matched?.brand || passedProduct.brand || "তাজা বাজার",
+        unit: matched?.unit || passedProduct.unit || "পিস",
         unitWeightKg: matched?.unitWeightKg || 1,
         pricePerUnit: passedProduct.discountPrice || passedProduct.price || matched?.pricePerUnit || 100,
-        image: passedProduct.image || matched?.image || "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&q=80",
+        image: imagesList[0],
+        images: imagesList,
         quantity: (location.state as any)?.quantity || 1,
+        selectedSize: (location.state as any)?.selectedSize || passedProduct.selectedSize,
+        selectedColor: (location.state as any)?.selectedColor || passedProduct.selectedColor,
       }];
     }
 
     if (globalCartItems && globalCartItems.length > 0) {
       return globalCartItems.map((cItem) => {
-        const matched = defaultFoodCatalog.find(p => p.id === cItem.productId);
+        const matched = defaultFoodCatalog.find(p => p.id === cItem.productId) as any;
+        const imagesList = ensureMultiImages(cItem);
         return {
           id: cItem.productId,
           nameBn: cItem.name,
-          brand: matched?.brand || "খাদ্য বাজার",
-          unit: matched?.unit || "পিস",
+          brand: matched?.brand || "বাজার",
+          unit: matched?.unit || cItem.weight || "পিস",
           unitWeightKg: matched?.unitWeightKg || 1,
           pricePerUnit: cItem.price,
-          image: cItem.image || "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&q=80",
+          image: imagesList[0] || cItem.image || "",
+          images: imagesList,
           quantity: cItem.quantity,
+          selectedSize: cItem.selectedSize,
+          selectedColor: cItem.selectedColor,
         };
       });
     }
@@ -166,8 +178,10 @@ export const FoodBuyFlow: React.FC = () => {
   // Delivery Method: "home" | "pickup"
   const [deliveryMethod, setDeliveryMethod] = useState<"home" | "pickup">("home");
 
-  // Payment Method: "wallet" | "bkash" | "nagad" | "rocket" | "upay" | "bank"
-  const [paymentMethod, setPaymentMethod] = useState<"wallet" | "bkash" | "nagad" | "rocket" | "upay" | "bank">("wallet");
+  // Payment Method: "bkash" | "nagad" | "rocket" | "upay" | "cellfin" | "cod"
+  const [paymentMethod, setPaymentMethod] = useState<"bkash" | "nagad" | "rocket" | "upay" | "cellfin" | "cod">("cod");
+  const [senderNumber, setSenderNumber] = useState("");
+  const [transactionId, setTransactionId] = useState("");
   const [walletBalance, setWalletBalance] = useState<number>(() => {
     const saved = localStorage.getItem("bnb_wallet_balance");
     return saved ? Number(saved) : 2500;
@@ -410,6 +424,13 @@ export const FoodBuyFlow: React.FC = () => {
       return;
     }
 
+    if (paymentMethod !== "cod") {
+      if (!senderNumber.trim() || !transactionId.trim()) {
+        alert("অনুগ্রহ করে যে নাম্বার থেকে টাকা পাঠিয়েছেন এবং ট্রানজেকশন আইডি (TrxID) দিন।");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     const now = new Date();
@@ -428,6 +449,8 @@ export const FoodBuyFlow: React.FC = () => {
         quantity: item.quantity,
         total: item.pricePerUnit * item.quantity,
         image: item.image,
+        selectedSize: item.selectedSize || null,
+        selectedColor: item.selectedColor || null,
       })),
       totalItems: totalItemCount,
       subtotal: totalItemPrice,
@@ -435,7 +458,12 @@ export const FoodBuyFlow: React.FC = () => {
       deliveryMethod: deliveryMethod === "home" ? "হোম ডেলিভারি" : "দোকান / পিকআপ",
       deliveryCharge: deliveryCharge,
       grandTotal: grandTotal,
-      paymentMethod: paymentMethod === "wallet" ? "BNB Wallet" : paymentMethod.toUpperCase(),
+      paymentMethod: paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod.toUpperCase(),
+      paymentStatus: paymentMethod === "cod" ? "unpaid" : (transactionId ? "pending_verification" : "unpaid"),
+      paymentDetails: (paymentMethod !== "cod") ? {
+        senderNumber,
+        transactionId
+      } : null,
       shippingAddress: activeAddress,
       status: "অর্ডার গ্রহণ করা হয়েছে",
       statusIndex: 3,
@@ -449,12 +477,6 @@ export const FoodBuyFlow: React.FC = () => {
     };
 
     try {
-      if (paymentMethod === "wallet") {
-        const newBal = Math.max(0, walletBalance - grandTotal);
-        setWalletBalance(newBal);
-        localStorage.setItem("bnb_wallet_balance", newBal.toString());
-      }
-
       try {
         await addDoc(collection(db, "food_orders"), orderPayload);
       } catch (e) {
@@ -514,7 +536,7 @@ export const FoodBuyFlow: React.FC = () => {
   if (isFoodCategoryDisabled) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
-        <SEO title="খাদ্য বাজার বন্ধ - আল মায়াদিন বাজার" description="Food Market currently offline" />
+        <SEO title="খাদ্য বাজার বন্ধ - All MAYADIN FASHION" description="Food Market currently offline" />
         <div className="w-20 h-20 bg-rose-100 text-rose-700 rounded-3xl flex items-center justify-center mb-4 shadow-sm">
           <AlertCircle className="w-10 h-10" />
         </div>
@@ -547,7 +569,7 @@ export const FoodBuyFlow: React.FC = () => {
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => {
-                  if (currentStep === 1) navigate("/category/cat1");
+                  if (currentStep === 1) navigate(-1);
                   else setCurrentStep(prev => prev - 1);
                 }} 
                 className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center border border-white/20 active:scale-95 transition-all"
@@ -624,10 +646,10 @@ export const FoodBuyFlow: React.FC = () => {
                 <p className="text-xs text-gray-500 mt-1">খাদ্য বাজার থেকে পছন্দের পণ্য যোগ করুন।</p>
               </div>
               <button
-                onClick={() => navigate("/category/cat1")}
+                onClick={() => navigate(-1)}
                 className="bg-[#004b23] text-white px-6 py-3 rounded-xl text-xs font-black shadow-md inline-flex items-center gap-2 active:scale-95"
               >
-                খাদ্য বাজারে পণ্য দেখুন <ChevronRight className="w-4 h-4" />
+                পণ্য দেখুন <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           ) : (
@@ -642,19 +664,33 @@ export const FoodBuyFlow: React.FC = () => {
                     exit={{ opacity: 0, x: -50 }}
                     className="bg-white rounded-[24px] p-4 border border-gray-100 shadow-sm space-y-3"
                   >
-                    <div className="flex gap-3.5 items-center">
+                    <div className="flex gap-3.5 items-start">
                       <img 
                         src={item.image} 
                         alt={item.nameBn} 
-                        className="w-18 h-18 object-cover rounded-2xl border border-gray-100 shrink-0"
+                        className="w-24 h-24 object-cover rounded-2xl border border-gray-100 shadow-sm shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <span className="text-[10px] font-bold text-gray-400 block">{item.brand}</span>
-                        <h3 className="text-sm font-black text-gray-900 truncate leading-snug">{item.nameBn}</h3>
-                        <p className="text-xs font-bold text-gray-500 mt-0.5">
+                        <h3 className="text-sm font-black text-gray-900 leading-snug line-clamp-2">{item.nameBn}</h3>
+                        {(categoryName === "কাপড় ও পরিধান" || categoryName.includes("কাপড়") || categoryName.includes("ফ্যাশন") || item.category === "cat3") && (item.selectedSize || item.selectedColor) && (
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            {item.selectedSize && (
+                              <span className="text-[10px] sm:text-xs font-black text-[#004b23] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 uppercase tracking-wide">
+                                সাইজ: {item.selectedSize}
+                              </span>
+                            )}
+                            {item.selectedColor && (
+                              <span className="text-[10px] sm:text-xs font-black text-gray-600 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100 uppercase tracking-wide">
+                                রঙ: {item.selectedColor}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <p className="text-xs font-bold text-gray-500 mt-1.5">
                           ৳{item.pricePerUnit} / {item.unit}
                         </p>
-                        <p className="text-xs font-black text-[#004b23] mt-0.5">
+                        <p className="text-sm font-black text-[#004b23] mt-1">
                           মোট: ৳{(item.pricePerUnit * item.quantity || 0).toLocaleString('bn-BD')}
                         </p>
                       </div>
@@ -664,9 +700,27 @@ export const FoodBuyFlow: React.FC = () => {
                         className="p-2.5 text-gray-400 hover:text-red-500 rounded-xl hover:bg-red-50 transition-colors"
                         title="বাদ দিন"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
+
+                    {item.images && item.images.length > 1 && (
+                      <div className="flex gap-2.5 overflow-x-auto py-1">
+                        {item.images.map((imgUrl, imgIdx) => (
+                          <button
+                            key={imgIdx}
+                            type="button"
+                            onClick={() => {
+                              const updated = orderItems.map(oi => oi.id === item.id ? { ...oi, image: imgUrl } : oi);
+                              setOrderItems(updated);
+                            }}
+                            className={`w-14 h-14 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${item.image === imgUrl ? 'border-[#004b23] shadow-md scale-105' : 'border-gray-100 opacity-70 hover:opacity-100'}`}
+                          >
+                            <img src={imgUrl} alt="thumb" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Quantity bar */}
                     <div className="flex items-center justify-between bg-[#f8faf8] p-2.5 rounded-2xl border border-gray-100">
@@ -697,10 +751,10 @@ export const FoodBuyFlow: React.FC = () => {
 
               {/* Add More Products Button */}
               <button
-                onClick={() => navigate("/category/cat1")}
+                onClick={() => navigate(-1)}
                 className="w-full bg-white text-[#004b23] border-2 border-dashed border-[#004b23]/30 hover:border-[#004b23] font-black py-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-98 transition-all"
               >
-                <Plus className="w-4 h-4 stroke-[3]" /> আরও খাদ্য পণ্য যোগ করুন
+                <Plus className="w-4 h-4 stroke-[3]" /> আরও পণ্য যোগ করুন
               </button>
             </div>
           )}
@@ -1249,63 +1303,30 @@ export const FoodBuyFlow: React.FC = () => {
 
           {/* Methods */}
           <div className="space-y-2">
-            {/* 1. BNB Wallet */}
-            <div
-              onClick={() => setPaymentMethod("wallet")}
-              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative ${
-                paymentMethod === "wallet" 
-                  ? "border-[#004b23] bg-[#f2f9f4] shadow-sm" 
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-xl sm:rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-800 shrink-0">
-                    <Wallet className="w-5 sm:w-6 h-5 sm:h-6" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">🟢 BNB Wallet</h3>
-                      <span className="bg-emerald-700 text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full">সুপারফাস্ট</span>
-                    </div>
-                    <p className="text-[10px] sm:text-xs font-bold text-[#004b23] mt-1">
-                      ব্যালেন্স: ৳{(walletBalance || 0).toLocaleString('bn-BD')}
-                    </p>
-                  </div>
-                </div>
-
-                <div className={`w-4 sm:w-5 h-4 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                  paymentMethod === "wallet" ? "border-[#004b23] bg-[#004b23]" : "border-gray-300"
-                }`}>
-                  {paymentMethod === "wallet" && <Check className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-white stroke-[3]" />}
-                </div>
-              </div>
-            </div>
-
             {/* 2. bKash */}
             <div
               onClick={() => setPaymentMethod("bkash")}
-              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative ${
+              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative overflow-hidden ${
                 paymentMethod === "bkash" 
-                  ? "border-[#d12053] bg-[#fff5f8] shadow-sm" 
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-[#e2136e] shadow-sm bg-[#e2136e]/5" 
+                  : "border-gray-100 hover:border-[#e2136e]/30"
               }`}
             >
+              {paymentMethod === "bkash" && <div className="absolute top-0 right-0 w-16 h-16 bg-[#e2136e]/10 rounded-bl-[100px] -z-10" />}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-xl sm:rounded-2xl bg-[#d12053]/10 flex items-center justify-center text-[#d12053] shrink-0 font-black text-sm sm:text-base">
+                <div className="flex items-center gap-2.5 sm:gap-4">
+                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-[#e2136e] flex items-center justify-center text-white shrink-0 font-black text-sm sm:text-base shadow-md">
                     বিকাশ
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">🟣 bKash</h3>
-                    <p className="text-[10px] sm:text-xs text-gray-500 mt-1">bKash দিয়ে সহজে পেমেন্ট করুন</p>
+                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">bKash (বিকাশ)</h3>
+                    <p className="text-[11px] sm:text-xs font-black text-[#e2136e] mt-1.5 tracking-wide font-mono bg-[#e2136e]/10 inline-block px-2 py-0.5 rounded-md">01618599077</p>
                   </div>
                 </div>
-
-                <div className={`w-4 sm:w-5 h-4 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                  paymentMethod === "bkash" ? "border-[#d12053] bg-[#d12053]" : "border-gray-300"
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  paymentMethod === "bkash" ? "border-[#e2136e] bg-[#e2136e]" : "border-gray-200 bg-gray-50"
                 }`}>
-                  {paymentMethod === "bkash" && <Check className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-white stroke-[3]" />}
+                  {paymentMethod === "bkash" && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
                 </div>
               </div>
             </div>
@@ -1313,27 +1334,27 @@ export const FoodBuyFlow: React.FC = () => {
             {/* 3. Nagad */}
             <div
               onClick={() => setPaymentMethod("nagad")}
-              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative ${
+              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative overflow-hidden ${
                 paymentMethod === "nagad" 
-                  ? "border-[#f7941d] bg-[#fffaf5] shadow-sm" 
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-[#ed1c24] shadow-sm bg-[#ed1c24]/5" 
+                  : "border-gray-100 hover:border-[#ed1c24]/30"
               }`}
             >
+              {paymentMethod === "nagad" && <div className="absolute top-0 right-0 w-16 h-16 bg-[#ed1c24]/10 rounded-bl-[100px] -z-10" />}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-xl sm:rounded-2xl bg-[#f7941d]/10 flex items-center justify-center text-[#f7941d] shrink-0 font-black text-sm sm:text-base">
+                <div className="flex items-center gap-2.5 sm:gap-4">
+                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#ed1c24] to-[#f7941d] flex items-center justify-center text-white shrink-0 font-black text-sm sm:text-base shadow-md">
                     নগদ
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">🟠 Nagad</h3>
-                    <p className="text-[10px] sm:text-xs text-gray-500 mt-1">Nagad দিয়ে পেমেন্ট করুন</p>
+                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">Nagad (নগদ)</h3>
+                    <p className="text-[11px] sm:text-xs font-black text-[#ed1c24] mt-1.5 tracking-wide font-mono bg-[#ed1c24]/10 inline-block px-2 py-0.5 rounded-md">01624228476</p>
                   </div>
                 </div>
-
-                <div className={`w-4 sm:w-5 h-4 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                  paymentMethod === "nagad" ? "border-[#f7941d] bg-[#f7941d]" : "border-gray-300"
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  paymentMethod === "nagad" ? "border-[#ed1c24] bg-[#ed1c24]" : "border-gray-200 bg-gray-50"
                 }`}>
-                  {paymentMethod === "nagad" && <Check className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-white stroke-[3]" />}
+                  {paymentMethod === "nagad" && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
                 </div>
               </div>
             </div>
@@ -1341,27 +1362,27 @@ export const FoodBuyFlow: React.FC = () => {
             {/* 4. Rocket */}
             <div
               onClick={() => setPaymentMethod("rocket")}
-              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative ${
+              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative overflow-hidden ${
                 paymentMethod === "rocket" 
-                  ? "border-[#8c3494] bg-[#faf4fb] shadow-sm" 
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-[#8c3494] shadow-sm bg-[#8c3494]/5" 
+                  : "border-gray-100 hover:border-[#8c3494]/30"
               }`}
             >
+              {paymentMethod === "rocket" && <div className="absolute top-0 right-0 w-16 h-16 bg-[#8c3494]/10 rounded-bl-[100px] -z-10" />}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-xl sm:rounded-2xl bg-[#8c3494]/10 flex items-center justify-center text-[#8c3494] shrink-0 font-black text-sm sm:text-base">
+                <div className="flex items-center gap-2.5 sm:gap-4">
+                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-[#8c3494] flex items-center justify-center text-white shrink-0 font-black text-sm sm:text-base shadow-md">
                     রকেট
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">🔵 Rocket</h3>
-                    <p className="text-[10px] sm:text-xs text-gray-500 mt-1">DBBL Rocket মোবাইল ব্যাংকিং</p>
+                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">Rocket (রকেট)</h3>
+                    <p className="text-[11px] sm:text-xs font-black text-[#8c3494] mt-1.5 tracking-wide font-mono bg-[#8c3494]/10 inline-block px-2 py-0.5 rounded-md">01624228476</p>
                   </div>
                 </div>
-
-                <div className={`w-4 sm:w-5 h-4 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                  paymentMethod === "rocket" ? "border-[#8c3494] bg-[#8c3494]" : "border-gray-300"
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  paymentMethod === "rocket" ? "border-[#8c3494] bg-[#8c3494]" : "border-gray-200 bg-gray-50"
                 }`}>
-                  {paymentMethod === "rocket" && <Check className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-white stroke-[3]" />}
+                  {paymentMethod === "rocket" && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
                 </div>
               </div>
             </div>
@@ -1369,55 +1390,83 @@ export const FoodBuyFlow: React.FC = () => {
             {/* 5. Upay */}
             <div
               onClick={() => setPaymentMethod("upay")}
-              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative ${
+              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative overflow-hidden ${
                 paymentMethod === "upay" 
-                  ? "border-[#ffb703] bg-[#fffdf5] shadow-sm" 
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-[#1372b6] shadow-sm bg-[#1372b6]/5" 
+                  : "border-gray-100 hover:border-[#1372b6]/30"
               }`}
             >
+              {paymentMethod === "upay" && <div className="absolute top-0 right-0 w-16 h-16 bg-[#1372b6]/10 rounded-bl-[100px] -z-10" />}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-xl sm:rounded-2xl bg-amber-100 flex items-center justify-center text-amber-900 shrink-0 font-black text-sm sm:text-base">
+                <div className="flex items-center gap-2.5 sm:gap-4">
+                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#1372b6] to-[#fdb913] flex items-center justify-center text-white shrink-0 font-black text-sm sm:text-base shadow-md">
                     উপায়
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">🟡 Upay</h3>
-                    <p className="text-[10px] sm:text-xs text-gray-500 mt-1">UCB Upay ডিজিটাল ওয়ালেট</p>
+                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">Upay (উপায়)</h3>
+                    <p className="text-[11px] sm:text-xs font-black text-[#1372b6] mt-1.5 tracking-wide font-mono bg-[#1372b6]/10 inline-block px-2 py-0.5 rounded-md">01618599077</p>
                   </div>
                 </div>
-
-                <div className={`w-4 sm:w-5 h-4 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                  paymentMethod === "upay" ? "border-[#ffb703] bg-[#ffb703]" : "border-gray-300"
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  paymentMethod === "upay" ? "border-[#1372b6] bg-[#1372b6]" : "border-gray-200 bg-gray-50"
                 }`}>
-                  {paymentMethod === "upay" && <Check className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-black stroke-[3]" />}
+                  {paymentMethod === "upay" && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
                 </div>
               </div>
             </div>
 
-            {/* 6. Bank Payment */}
+            {/* 6. CellFin */}
             <div
-              onClick={() => setPaymentMethod("bank")}
-              className={`p-3.5 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative ${
-                paymentMethod === "bank" 
-                  ? "border-blue-700 bg-blue-50/50 shadow-sm" 
-                  : "border-gray-200 hover:border-gray-300"
+              onClick={() => setPaymentMethod("cellfin")}
+              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative overflow-hidden ${
+                paymentMethod === "cellfin" 
+                  ? "border-[#007f4f] shadow-sm bg-[#007f4f]/5" 
+                  : "border-gray-100 hover:border-[#007f4f]/30"
               }`}
             >
+              {paymentMethod === "cellfin" && <div className="absolute top-0 right-0 w-16 h-16 bg-[#007f4f]/10 rounded-bl-[100px] -z-10" />}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-xl sm:rounded-2xl bg-blue-100 flex items-center justify-center text-blue-900 shrink-0">
-                    <Building2 className="w-5 sm:w-6 h-5 sm:h-6" />
+                <div className="flex items-center gap-2.5 sm:gap-4">
+                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-[#007f4f] flex items-center justify-center text-white shrink-0 font-black text-[11px] sm:text-[13px] shadow-md tracking-tighter">
+                    CellFin
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-black text-gray-900">🏦 Bank</h3>
-                    <p className="text-[10px] sm:text-xs text-gray-500">ব্যাংক ট্রান্সফার বা কার্ড পেমেন্ট</p>
+                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">CellFin (সেলফিন)</h3>
+                    <p className="text-[11px] sm:text-xs font-black text-[#007f4f] mt-1.5 tracking-wide font-mono bg-[#007f4f]/10 inline-block px-2 py-0.5 rounded-md">01624228476</p>
                   </div>
                 </div>
-
-                <div className={`w-4 sm:w-5 h-4 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                  paymentMethod === "bank" ? "border-blue-700 bg-blue-700" : "border-gray-300"
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  paymentMethod === "cellfin" ? "border-[#007f4f] bg-[#007f4f]" : "border-gray-200 bg-gray-50"
                 }`}>
-                  {paymentMethod === "bank" && <Check className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-white stroke-[3]" />}
+                  {paymentMethod === "cellfin" && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                </div>
+              </div>
+            </div>
+
+            {/* 7. Cash on Delivery (COD) */}
+            <div
+              onClick={() => setPaymentMethod("cod")}
+              className={`p-3 sm:p-4 rounded-[18px] sm:rounded-[22px] border-2 transition-all cursor-pointer bg-white relative overflow-hidden ${
+                paymentMethod === "cod" 
+                  ? "border-emerald-500 shadow-sm bg-emerald-50" 
+                  : "border-gray-100 hover:border-emerald-500/30"
+              }`}
+            >
+              {paymentMethod === "cod" && <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-bl-[100px] -z-10" />}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 sm:gap-4">
+                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-md">
+                    <Truck className="w-5 sm:w-6 h-5 sm:h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-none">ক্যাশ অন ডেলিভারি</h3>
+                    <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 mt-1.5 tracking-wide">হাতে পেয়ে টাকা পরিশোধ করুন</p>
+                  </div>
+                </div>
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  paymentMethod === "cod" ? "border-emerald-500 bg-emerald-500" : "border-gray-200 bg-gray-50"
+                }`}>
+                  {paymentMethod === "cod" && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
                 </div>
               </div>
             </div>
@@ -1464,6 +1513,14 @@ export const FoodBuyFlow: React.FC = () => {
                 <div key={item.id} className="py-2 flex justify-between items-start gap-2">
                   <div className="flex-1 min-w-0">
                     <span className="font-black text-gray-900 block text-xs sm:text-[13px] leading-tight truncate">{item.nameBn}</span>
+                    
+                    {(categoryName === "কাপড় ও পরিধান" || categoryName.includes("কাপড়") || categoryName.includes("ফ্যাশন") || item.category === "cat3") && (item.selectedSize || item.selectedColor) && (
+                      <div className="flex items-center gap-1.5 mt-0.5 mb-0.5">
+                        {item.selectedSize && <span className="text-[9px] font-black text-white bg-gray-800 px-1.5 py-[1px] rounded uppercase">{item.selectedSize}</span>}
+                        {item.selectedColor && <span className="text-[9px] font-black text-gray-600 bg-gray-100 px-1.5 py-[1px] rounded uppercase">{item.selectedColor}</span>}
+                      </div>
+                    )}
+
                     <span className="text-[10px] sm:text-xs text-gray-500 font-bold">
                       {item.quantity} {item.unit} × ৳{item.pricePerUnit}
                     </span>
@@ -1531,9 +1588,9 @@ export const FoodBuyFlow: React.FC = () => {
                 <button onClick={() => setCurrentStep(4)} className="text-[10px] font-bold text-[#004b23]">পরিবর্তন</button>
               </div>
               <p className="text-xs font-black text-gray-900 truncate">
-                {paymentMethod === "wallet" ? "BNB Wallet" : paymentMethod.toUpperCase()}
+                {paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod.toUpperCase()}
               </p>
-              <p className="text-[10px] text-green-700 font-bold">অনলাইন / অটো</p>
+              <p className="text-[10px] text-green-700 font-bold">{paymentMethod === "cod" ? "ক্যাশ" : "অনলাইন / অটো"}</p>
             </div>
           </div>
 
@@ -1553,6 +1610,46 @@ export const FoodBuyFlow: React.FC = () => {
               <span className="text-xl font-black text-[#004b23]">৳{(grandTotal || 0).toLocaleString('bn-BD')}</span>
             </div>
           </div>
+
+          {/* Payment Verification Form (If Not COD) */}
+          {(paymentMethod !== "cod") && (
+            <div className="bg-[#fff9e6] rounded-[24px] p-5 border-2 border-[#ffb703]/30 shadow-sm space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#ffb703]/20 flex items-center justify-center text-[#d97706] shrink-0 mt-0.5">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-gray-900">পেমেন্ট ভেরিফিকেশন</h3>
+                  <p className="text-[11px] font-bold text-gray-600 mt-0.5 leading-snug">
+                    অনুগ্রহ করে উপরে দেওয়া নাম্বারে <span className="font-black text-[#d97706]">৳{(grandTotal || 0).toLocaleString('bn-BD')}</span> সেন্ট মানি (Send Money) করে নিচের তথ্যগুলো পূরণ করুন।
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-700 mb-1">যে নাম্বার থেকে টাকা পাঠিয়েছেন:</label>
+                  <input
+                    type="tel"
+                    value={senderNumber}
+                    onChange={(e) => setSenderNumber(e.target.value)}
+                    placeholder="যেমন: 017XXXXXXX"
+                    className="w-full px-4 py-3 bg-white border border-[#ffb703]/50 rounded-xl text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#ffb703] transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-700 mb-1">ট্রানজেকশন আইডি (TrxID):</label>
+                  <input
+                    type="text"
+                    value={transactionId}
+                    onChange={(e) => setTransactionId(e.target.value)}
+                    placeholder="যেমন: 8HG9J4KM"
+                    className="w-full px-4 py-3 bg-white border border-[#ffb703]/50 rounded-xl text-sm font-bold text-gray-900 uppercase focus:outline-none focus:ring-2 focus:ring-[#ffb703] transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Verification Checkbox */}
           <label className="flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-gray-200 cursor-pointer shadow-sm">
@@ -1656,10 +1753,10 @@ export const FoodBuyFlow: React.FC = () => {
             </button>
 
             <button
-              onClick={() => navigate("/category/cat1")}
+              onClick={() => navigate("/")}
               className="w-full bg-white text-[#004b23] border-2 border-[#004b23] font-black py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm"
             >
-              খাদ্য বাজারে ফিরে যান
+              হোম পেইজে ফিরে যান
             </button>
           </div>
         </div>
@@ -1674,7 +1771,7 @@ export const FoodBuyFlow: React.FC = () => {
           <div className="flex items-center justify-between pb-2 border-b border-gray-200">
             <button 
               onClick={() => {
-                if (paramOrderId) navigate("/category/cat1");
+                if (paramOrderId) navigate("/");
                 else setCurrentStep(6);
               }} 
               className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm active:scale-95"
@@ -1688,7 +1785,7 @@ export const FoodBuyFlow: React.FC = () => {
               <span className="text-xs font-bold text-gray-500">লাইভ ট্র্যাকিং টাইমলাইন</span>
             </div>
             <button 
-              onClick={() => navigate("/category/cat1")}
+              onClick={() => navigate("/")}
               className="text-xs font-black text-[#004b23]"
             >
               বাজার

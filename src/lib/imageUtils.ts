@@ -34,3 +34,27 @@ export const compressImage = (file: File): Promise<string> => {
     reader.readAsDataURL(file);
   });
 };
+
+export const ensureMultiImages = (product: any): string[] => {
+  if (product?.images && Array.isArray(product.images) && product.images.length > 0) {
+    const valid = product.images.filter(Boolean);
+    if (valid.length > 1) return valid;
+    if (valid.length === 1) {
+      const base = valid[0];
+      return [
+        base,
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80",
+        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
+        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80"
+      ];
+    }
+  }
+
+  const singleImg = product?.image || product?.imageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80";
+  return [
+    singleImg,
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80",
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
+    "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80"
+  ];
+};

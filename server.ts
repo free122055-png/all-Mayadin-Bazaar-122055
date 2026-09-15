@@ -26,7 +26,7 @@ try {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -534,7 +534,7 @@ async function startServer() {
       const salt = crypto.randomBytes(16).toString("hex");
       const otpHash = crypto.createHash("sha256").update(otp + salt).digest("hex");
 
-      const messageContent = `Your Al Mayadin Bazar verification code is ${otp}. Valid for 5 minutes. Please do not share this OTP.`;
+      const messageContent = `Your All MAYADIN FASHION verification code is ${otp}. Valid for 5 minutes. Please do not share this OTP.`;
       const url = `${baseUrl}?apikey=${apiKey}&secretkey=${secretKey}&callerID=${senderId}&toUser=${formatted}&messageContent=${encodeURIComponent(messageContent)}`;
 
       console.log(`[OTP SMS] Transmitting REAL OTP ${otp} for ${formatted} via SAS Gateway`);
@@ -1008,7 +1008,7 @@ async function startServer() {
       const salt = crypto.randomBytes(16).toString("hex");
       const otpHash = crypto.createHash("sha256").update(otp + salt).digest("hex");
 
-      const messageContent = `Your Al Mayadin Bazar password reset code is ${otp}. Valid for 5 minutes. Do not share this OTP.`;
+      const messageContent = `Your All MAYADIN FASHION password reset code is ${otp}. Valid for 5 minutes. Do not share this OTP.`;
       const url = `${baseUrl}?apikey=${apiKey}&secretkey=${secretKey}&callerID=${senderId}&toUser=${formatted}&messageContent=${encodeURIComponent(messageContent)}`;
 
       console.log(`[Forgot Password OTP] Sending reset OTP to ${formatted} via Bulk SMS Gateway`);
@@ -1354,7 +1354,7 @@ async function startServer() {
             return res.json({ 
               success: true, 
               message: "OneSignal REST API Key ১০০% সফলভাবে কানেক্ট হয়েছে!", 
-              appName: appData.name || "Al Mayadin Bazar",
+              appName: appData.name || "All MAYADIN FASHION",
               players: appData.players || 0
             });
           }
@@ -1392,7 +1392,7 @@ async function startServer() {
         return res.status(400).json({ error: "Title and Message are required." });
       }
 
-      // Default Brand Icon & Assets for Al Mayadin Bazar
+      // Default Brand Icon & Assets for All MAYADIN FASHION
       const BRAND_LOGO_URL = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80";
 
       const payload: any = {
@@ -1635,10 +1635,10 @@ async function startServer() {
     const resendKey = config.resendKey || process.env.RESEND_API_KEY || "";
     if (resendKey) {
       const verifiedDomainSenders = [
-        "Al Mayadin Bazar <noreply@fahiminternet.com>",
-        "Al Mayadin Bazar <info@fahiminternet.com>",
-        "Al Mayadin Bazar <admin@fahiminternet.com>",
-        "Al Mayadin Bazar <onboarding@resend.dev>"
+        "All MAYADIN FASHION <noreply@fahiminternet.com>",
+        "All MAYADIN FASHION <info@fahiminternet.com>",
+        "All MAYADIN FASHION <admin@fahiminternet.com>",
+        "All MAYADIN FASHION <onboarding@resend.dev>"
       ];
 
       for (const senderEmail of verifiedDomainSenders) {
@@ -1688,7 +1688,7 @@ async function startServer() {
         });
 
         const info = await transporter.sendMail({
-          from: `"${config.fromName || "Al Mayadin Bazar"}" <${cleanUser}>`,
+          from: `"${config.fromName || "All MAYADIN FASHION"}" <${cleanUser}>`,
           to: to.trim(),
           replyTo: cleanUser,
           subject,
@@ -2631,9 +2631,9 @@ async function startServer() {
       let html = fs.readFileSync(indexPath, "utf8");
       const { productId } = req.params;
       const cleanId = decodeURIComponent(productId || "").trim();
-      const productTitle = `আল মায়াদিন বাজার - প্রোডাক্ট #${cleanId}`;
+      const productTitle = `All MAYADIN FASHION - প্রোডাক্ট #${cleanId}`;
       const productUrl = `https://almayadinbazar.com/product/${encodeURIComponent(cleanId)}`;
-      const productDesc = `আল মায়াদিন বাজারে সুলভ মূল্যে ক্যাশ অন ডেলিভারিতে অর্ডার করুন।`;
+      const productDesc = `All MAYADIN FASHIONে সুলভ মূল্যে ক্যাশ অন ডেলিভারিতে অর্ডার করুন।`;
 
       html = html.replace(/<title>.*?<\/title>/gi, `<title>${productTitle}</title>`);
       html = html.replace(/<meta property="og:title".*?>/gi, `<meta property="og:title" content="${productTitle}">`);

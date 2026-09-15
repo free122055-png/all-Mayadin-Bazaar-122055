@@ -237,13 +237,13 @@ function sanitizeProductData(id: string, data: any): ResolvedProduct {
     unit: data.unit || data.weight || "",
     stockQuantity: data.stockQuantity !== undefined ? Number(data.stockQuantity) : 50,
     stockStatus: data.stockStatus || (data.status === "inactive" ? "Out of Stock" : "In Stock"),
-    description: data.description || data.descriptionBn || "আল মায়াদিন বাজারের প্রিমিয়াম কোয়ালিটির পণ্য।",
+    description: data.description || data.descriptionBn || "All MAYADIN FASHIONের প্রিমিয়াম কোয়ালিটির পণ্য।",
     image: images[0],
     images: images,
     colors: data.colors || (data.color ? [data.color] : []),
     sizes: data.sizes || (data.size ? [data.size] : []),
     variants: data.variants || [],
-    brand: data.brand || "আল মায়াদিন",
+    brand: data.brand || "All MAYADIN FASHION",
     rating: data.rating || 4.9,
     reviews: data.reviews || "150+",
     status: data.status || "active",
@@ -287,7 +287,7 @@ function evaluateProductAvailability(product: ResolvedProduct): ProductFetchResu
  */
 export function generateShareDetails(product: ResolvedProduct, preferredDomain?: string) {
   const deepLink = getProductDeepLink(product);
-  const title = product.nameBn || product.name || "আল মায়াদিন বাজার";
+  const title = product.nameBn || product.name || "All MAYADIN FASHION";
   const price = product.discountPrice || product.price;
   const originalPrice = product.price;
   const hasDiscount = originalPrice && price < originalPrice;
@@ -296,7 +296,7 @@ export function generateShareDetails(product: ResolvedProduct, preferredDomain?:
     ? `৳${price} (মূল মূল্য: ৳${originalPrice})` 
     : `৳${price}`;
 
-  const messageText = `🛍️ *AL MAYADIN BAZAR*\n📌 *${title}*\n💰 অফার মূল্য: ${priceText}\n🚚 সারাদেশে ক্যাশ অন ডেলিভারি!\n\n📱 *অ্যাপে সরাসরি পণ্যটি দেখতে ও অর্ডার করতে ক্লিক করুন:*\n${deepLink}`;
+  const messageText = `🛍️ *All MAYADIN FASHION*\n📌 *${title}*\n💰 অফার মূল্য: ${priceText}\n🚚 সারাদেশে ক্যাশ অন ডেলিভারি!\n\n📱 *অ্যাপে সরাসরি পণ্যটি দেখতে ও অর্ডার করতে ক্লিক করুন:*\n${deepLink}`;
 
   const encodedText = encodeURIComponent(messageText);
 

@@ -15,7 +15,9 @@ import {
   User,
   Phone,
   MapPin,
-  Calendar
+  Calendar,
+  XCircle,
+  CheckCircle2
 } from "lucide-react";
 
 interface OrderItem {
@@ -44,6 +46,11 @@ interface Order {
   deliveryCharge: number;
   grandTotal: number;
   paymentMethod: string;
+  paymentStatus?: string;
+  paymentDetails?: {
+    senderNumber?: string;
+    transactionId?: string;
+  } | null;
   deliveryMethod: string;
   status: string;
   createdAt: number;
@@ -85,6 +92,20 @@ export const OrderManagement: React.FC = () => {
       }
     } catch (error) {
       console.error("Error updating status:", error);
+    }
+  };
+
+  const updatePaymentStatus = async (orderId: string, newStatus: string) => {
+    try {
+      await updateDoc(doc(db, "food_orders", orderId), {
+        paymentStatus: newStatus,
+        updatedAt: Date.now()
+      });
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(prev => prev ? { ...prev, paymentStatus: newStatus } : null);
+      }
+    } catch (error) {
+      console.error("Error updating payment status:", error);
     }
   };
 
@@ -352,12 +373,12 @@ export const OrderManagement: React.FC = () => {
                           <td className="px-4 py-3">
                             <div className="flex flex-col">
                               <span className="text-xs font-bold text-gray-800">{item.nameBn || item.name || "পণ্য"}</span>
-                              {(item.selectedSize || item.size) && (
+                              {(!selectedOrder.categoryId || selectedOrder.categoryId === "cat3" || selectedOrder.categoryId === "clothing" || String(item.nameBn).includes("শার্ট") || String(item.nameBn).includes("পাঞ্জাবি") || String(item.nameBn).includes("বোরকা") || String(item.nameBn).includes("শাড়ি") || String(item.nameBn).includes("কাপড়") || String(item.nameBn).includes("প্যান্ট")) && (item.selectedSize || item.size) && (
                                 <span className="inline-flex items-center w-fit px-2 py-0.5 bg-purple-50 text-[#5842dc] border border-purple-200 rounded-md text-[10px] font-black mt-1">
                                   👗 সাইজ: {item.selectedSize || item.size}
                                 </span>
                               )}
-                              {(item.selectedColor || item.color) && (
+                              {(!selectedOrder.categoryId || selectedOrder.categoryId === "cat3" || selectedOrder.categoryId === "clothing" || String(item.nameBn).includes("শার্ট") || String(item.nameBn).includes("পাঞ্জাবি") || String(item.nameBn).includes("বোরকা") || String(item.nameBn).includes("শাড়ি") || String(item.nameBn).includes("কাপড়") || String(item.nameBn).includes("প্যান্ট")) && (item.selectedColor || item.color) && (
                                 <span className="inline-flex items-center w-fit px-2 py-0.5 bg-gray-100 text-gray-700 rounded-md text-[10px] font-bold mt-0.5">
                                   রং: {item.selectedColor || item.color}
                                 </span>
@@ -395,13 +416,58 @@ export const OrderManagement: React.FC = () => {
 
               {/* Payment Info */}
               <div className="flex flex-wrap gap-4">
-                <div className="flex-1 min-w-[140px] p-3 bg-gray-50 rounded-xl">
-                  <span className="text-[10px] font-black text-gray-400 uppercase block">পেমেন্ট মেথড</span>
-                  <span className="text-xs font-bold text-gray-900">{selectedOrder.paymentMethod}</span>
+                <div className="flex-1 min-w-[140px] p-4 bg-gray-50 rounded-xl space-y-3">
+                  <div>
+                    <span className="text-[10px] font-black text-gray-400 uppercase block">পেমেন্ট মেথড</span>
+                    <span className="text-sm font-black text-gray-900">{selectedOrder.paymentMethod}</span>
+                  </div>
+                  
+                  {selectedOrder.paymentDetails && (
+                    <div className="pt-2 border-t border-gray-200 space-y-1">
+                      <div>
+                        <span className="text-[10px] text-gray-500">প্রেরক:</span>
+                        <span className="text-xs font-bold text-gray-900 ml-1">{selectedOrder.paymentDetails.senderNumber}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-gray-500">TrxID:</span>
+                        <span className="text-xs font-bold text-gray-900 ml-1 uppercase">{selectedOrder.paymentDetails.transactionId}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-2 border-t border-gray-200 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-black text-gray-400 uppercase block mb-1">পেমেন্ট স্ট্যাটাস</span>
+                      {selectedOrder.paymentStatus === 'paid' ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                          <CheckCircle2 className="w-3 h-3" /> পেইড
+                        </span>
+                      ) : selectedOrder.paymentStatus === 'pending_verification' ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                          <Clock className="w-3 h-3" /> ভেরিফিকেশন অপেক্ষায়
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full">
+                          <XCircle className="w-3 h-3" /> আনপেইড
+                        </span>
+                      )}
+                    </div>
+                    
+                    {selectedOrder.paymentStatus === 'pending_verification' && (
+                      <button 
+                        onClick={() => updatePaymentStatus(selectedOrder.id, 'paid')}
+                        className="text-[11px] font-bold bg-[#004b23] text-white px-3 py-1.5 rounded-lg hover:bg-[#00381a] transition-colors"
+                      >
+                        ভেরিফাই করুন
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-[140px] p-3 bg-gray-50 rounded-xl">
-                  <span className="text-[10px] font-black text-gray-400 uppercase block">অর্ডারের তারিখ</span>
-                  <span className="text-xs font-bold text-gray-900">{formatDate(selectedOrder.createdAt)}</span>
+                <div className="flex-1 min-w-[140px] p-4 bg-gray-50 rounded-xl flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] font-black text-gray-400 uppercase block">অর্ডারের তারিখ</span>
+                    <span className="text-sm font-bold text-gray-900">{formatDate(selectedOrder.createdAt)}</span>
+                  </div>
                 </div>
               </div>
             </div>
