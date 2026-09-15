@@ -1,6 +1,6 @@
 {
-	"appId": "com.almayadinbazar.app",
-	"appName": "AL MAYADIN BAZAAR",
+	"appId": "com.dailyinternetoffer.bd",
+	"appName": "All MAYADIN FASHION",
 	"webDir": "dist",
 	"bundledWebRuntime": false,
 	"plugins": {
@@ -15,7 +15,7 @@
 			"splashImmersive": true
 		},
 		"CapacitorHttp": {
-			"enabled": true
+			"enabled": false
 		}
 	}
 }

@@ -7,9 +7,7 @@ import firebaseConfig from "../../firebase-applet-config.json";
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore with auto detect long polling to bypass WebSocket connection delays in some environments
-export const db = initializeFirestore(app, {
-  experimentalAutoDetectLongPolling: true
-}, firebaseConfig.firestoreDatabaseId);
+export const db = initializeFirestore(app, {}, firebaseConfig.firestoreDatabaseId);
 
 export const auth = getAuth(app);
 export const storage = getStorage(app);
