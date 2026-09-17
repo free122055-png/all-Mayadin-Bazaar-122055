@@ -49,14 +49,19 @@ export const Checkout: React.FC = () => {
       const total = subtotal + deliveryCharge;
       const orderNumber = `AMB-${Date.now().toString().slice(-6)}`;
       
-      const orderData: Omit<Order, 'id'> = {
+      const orderData: any = {
         orderNumber,
+        orderId: orderNumber,
         userId: user.uid,
+        customerName: profile?.displayName || user.displayName || "Customer",
+        customerPhone: profile?.phoneNumber || "",
         items,
         subtotal,
         deliveryCharge,
         discount: 0,
         total,
+        grandTotal: total,
+        status: 'pending',
         codAmount: paymentMethod === 'cod' ? total : 0,
         shippingAddress: {
           id: 'temp',
@@ -83,6 +88,9 @@ export const Checkout: React.FC = () => {
       };
 
       const docRef = await addDoc(collection(db, "food_orders"), orderData);
+      try {
+        localStorage.setItem("last_placed_order_id", docRef.id);
+      } catch (e) {}
       setOrderId(orderNumber);
       setIsSuccess(true);
       clearCart();

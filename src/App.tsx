@@ -10,6 +10,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DeepLinkHandler } from "./components/DeepLinkHandler";
 import { SplashScreen } from "./components/SplashScreen";
 import { EmailPromptModal } from "./components/EmailPromptModal";
+import { FloatingOrderBubble } from "./components/FloatingOrderBubble";
 
 import { NotificationProvider } from "./context/NotificationContext";
 
@@ -194,9 +195,12 @@ function AppLayout() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/contact-us" element={<Contact />} />
             <Route path="/account-settings" element={<AccountSettings />} />
+            <Route path="/account/settings" element={<AccountSettings />} />
             <Route path="/settings" element={<AccountSettings />} />
             <Route path="/cert" element={<DownloadCert />} />
             <Route path="/download-cert" element={<DownloadCert />} />
+            
+            <Route path="/security" element={<Legal />} />
             
             <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
             <Route path="/super-admin" element={<ProtectedRoute adminOnly><SuperAdmin /></ProtectedRoute>} />
@@ -210,6 +214,7 @@ function AppLayout() {
         </Suspense>
       </main>
       <BottomNav />
+      <FloatingOrderBubble />
       <DeepLinkHandler />
       <AuthModal />
     </div>

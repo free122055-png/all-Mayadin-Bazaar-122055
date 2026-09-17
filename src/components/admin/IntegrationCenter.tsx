@@ -110,7 +110,7 @@ export const IntegrationCenter: React.FC<IntegrationCenterProps> = ({ preSelecte
               <IntegrationCard 
                 name="Steadfast Courier"
                 description="Automated delivery management, real-time tracking, and parcel creation for your orders."
-                status={integrations.steadfast.status}
+                status={integrations?.steadfast?.status || "not_configured"}
                 icon={<Truck className="w-6 h-6 text-[#5842dc]" />}
                 onConfigure={() => setView("steadfast")}
                 onToggle={(enabled) => handleToggle("steadfast", enabled)}
@@ -119,7 +119,7 @@ export const IntegrationCenter: React.FC<IntegrationCenterProps> = ({ preSelecte
               <IntegrationCard 
                 name="Bulk SMS Gateway"
                 description="Send automated order confirmations and marketing SMS to your customers."
-                status={integrations.sms.status}
+                status={integrations?.sms?.status || "not_configured"}
                 icon={<MessageSquare className="w-6 h-6 text-amber-500" />}
                 onConfigure={() => setView("sms")}
                 onToggle={(enabled) => handleToggle("sms", enabled)}
@@ -128,7 +128,7 @@ export const IntegrationCenter: React.FC<IntegrationCenterProps> = ({ preSelecte
               <IntegrationCard 
                 name="OneSignal Push"
                 description="Engage users with real-time push notifications across all devices and browsers."
-                status={integrations.onesignal.status}
+                status={integrations?.onesignal?.status || "not_configured"}
                 icon={<Bell className="w-6 h-6 text-[#5842dc]" />}
                 onConfigure={() => setView("onesignal")}
                 onToggle={(enabled) => handleToggle("onesignal", enabled)}

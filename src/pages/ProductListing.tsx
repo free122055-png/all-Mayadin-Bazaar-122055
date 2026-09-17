@@ -1304,46 +1304,7 @@ export const ProductListing: React.FC = () => {
                </div>
             </section>
 
-            {/* Featured Gadget Section */}
-            <section className="px-4 py-2">
-               <h3 className="text-gray-800 text-[13px] font-black tracking-wider uppercase mb-3 flex items-center gap-1.5">
-                 <span className="text-[16px]">💡</span> FEATURED GADGET
-               </h3>
-               <div className="bg-[#f4f4f4] rounded-[24px] p-5 flex relative overflow-hidden h-[160px] shadow-sm">
-                  <div className="flex flex-col justify-center w-[60%] relative z-10 text-gray-900">
-                     <h2 className="text-[18px] font-black leading-[1.2] flex items-center gap-1.5 mb-2 text-[#0f172a]">
-                        স্মার্ট জীবনের<br/>ছোট ছোট সমাধান
-                     </h2>
-                     <p className="text-gray-700 text-[11px] font-bold leading-[1.4] mb-3">
-                        প্রিমিয়াম গ্যাজেট সেরা অফারে
-                     </p>
-                     <button className="bg-black text-white px-4 py-2 rounded-[20px] text-[10px] font-black w-fit tracking-wide shadow-md flex items-center gap-1">
-                       অফার দেখুন <ChevronRight className="w-3 h-3" />
-                     </button>
-                  </div>
-                  <div className="absolute right-[-5%] top-[-10%] h-[120%] w-[50%] flex items-center py-2">
-                     <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=400&q=80" alt="Featured Electronics" className="w-full h-full object-contain drop-shadow-xl" />
-                  </div>
-               </div>
-            </section>
 
-            {/* Offer Section */}
-            <section className="px-4 py-6">
-               <div className="bg-[#0b1120] rounded-[24px] p-5 flex relative overflow-hidden h-[140px] shadow-md border border-gray-800">
-                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
-                  <div className="flex flex-col justify-center w-[100%] relative z-10 text-white">
-                     <h2 className="text-[16px] font-black leading-[1.2] flex items-center gap-1.5 mb-2 text-[#93c5fd]">
-                        <span className="text-[18px]">🏷️</span> আজকের গ্যাজেট অফার
-                     </h2>
-                     <p className="text-[#e2e8f0] text-[11px] font-bold leading-[1.4] mb-3">
-                        ২৫% ছাড়! ব্লুটুথ স্পিকার সেট<br/>শিক্ষার জন্য। প্রিমিয়াম স্টাইলে ২০% ছাড়।
-                     </p>
-                     <button className="bg-[#93c5fd] text-[#0f172a] px-4 py-2 rounded-[20px] text-[10px] font-black w-fit tracking-wide shadow-md flex items-center gap-1">
-                       অফার দেখুন <ChevronRight className="w-3 h-3" />
-                     </button>
-                  </div>
-               </div>
-            </section>
 
             {/* All Products */}
             <section className="px-4 py-2">
@@ -1572,45 +1533,7 @@ export const ProductListing: React.FC = () => {
                </div>
             </section>
 
-            {/* Featured Knowledge Section */}
-            <section className="px-4 py-2">
-               <h3 className="text-gray-800 text-[13px] font-black tracking-wider uppercase mb-3 flex items-center gap-1.5">
-                 <span className="text-[16px]">✨</span> FEATURED KNOWLEDGE SECTION
-               </h3>
-               <div className="bg-[#f5f1ea] rounded-[24px] p-5 flex relative overflow-hidden h-[160px] shadow-sm">
-                  <div className="flex flex-col justify-center w-[60%] relative z-10 text-gray-900">
-                     <h2 className="text-[18px] font-black leading-[1.2] flex items-center gap-1.5 mb-2 text-[#0f172a]">
-                        “শেখার যাত্রা<br/>শুরু হোক আজ”
-                     </h2>
-                     <p className="text-gray-700 text-[11px] font-bold leading-[1.4] mb-3">
-                        আপনার জ্ঞানের নতুন সংযোজন
-                     </p>
-                     <button className="bg-[#0f172a] text-[#cca25f] px-4 py-2 rounded-[20px] text-[10px] font-black w-fit tracking-wide shadow-md flex items-center gap-1">
-                       অফার দেখুন <ChevronRight className="w-3 h-3" />
-                     </button>
-                  </div>
-                  <div className="absolute right-[-10%] top-[-10%] h-[120%] w-[55%] flex items-center py-2">
-                     <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&q=80" alt="Featured Education" className="w-full h-full object-cover drop-shadow-xl rounded-l-full" />
-                  </div>
-               </div>
-            </section>
 
-            {/* Offer Section */}
-            <section className="px-4 py-6">
-               <div className="bg-[#0f172a] rounded-[24px] p-5 flex relative overflow-hidden h-[140px] shadow-sm border-t-2 border-b-2 border-dashed border-[#cca25f]">
-                  <div className="flex flex-col justify-center w-[100%] relative z-10 text-white">
-                     <h2 className="text-[16px] font-black leading-[1.2] flex items-center gap-1.5 mb-2 text-[#cca25f]">
-                        <span className="text-[18px]">🏷️</span> শিক্ষার জন্য বিশেষ অফার
-                     </h2>
-                     <p className="text-[#e2e8f0] text-[10px] font-bold leading-[1.4] mb-3">
-                        শিক্ষার উৎকর্ষ সাধনে আমাদের বিশেষ অফার। প্রিমিয়াম শিক্ষা সামগ্রীতে বিশেষ ছাড়।
-                     </p>
-                     <button className="bg-[#cca25f] text-[#0f172a] px-4 py-2 rounded-[20px] text-[10px] font-black w-fit tracking-wide shadow-md flex items-center gap-1">
-                       অফার দেখুন <ChevronRight className="w-3 h-3" />
-                     </button>
-                  </div>
-               </div>
-            </section>
 
             {/* All Products */}
             <section className="px-4 py-2">
@@ -1840,48 +1763,7 @@ export const ProductListing: React.FC = () => {
                </div>
             </section>
 
-            {/* Featured Islamic Collection */}
-            <section className="px-4 py-2">
-               <h3 className="text-gray-800 text-[13px] font-black tracking-wider uppercase mb-3 flex items-center gap-1.5">
-                 <span className="text-[16px]">✨</span> FEATURED ISLAMIC COLLECTION
-               </h3>
-               <div className="bg-[#f0ece1] rounded-[24px] p-5 flex relative overflow-hidden h-[160px] shadow-sm">
-                  <div className="flex flex-col justify-center w-[55%] relative z-10 text-gray-900">
-                     <h2 className="text-[16px] font-black leading-[1.2] flex items-center gap-1.5 mb-2 text-[#004b23]">
-                        <span className="text-[18px]">🕌</span> আতর টুপি ও<br/>লাইফস্টাইল
-                     </h2>
-                     <p className="text-gray-700 text-[11px] font-bold leading-[1.4] mb-3">
-                        আপনার স্টাইলের নতুন সংযোজন
-                     </p>
-                     <button className="bg-[#004b23] text-white px-4 py-2 rounded-[20px] text-[10px] font-black w-fit tracking-wide shadow-md">
-                       লাইফস্টাইল পণ্য
-                     </button>
-                  </div>
-                  <div className="absolute right-[-5%] top-[-10%] h-[120%] w-[55%] flex items-center py-2">
-                     <img src="https://images.unsplash.com/photo-1596766436923-b6d4cb800888?w=400&q=80" alt="Featured Islamic" className="w-full h-full object-contain drop-shadow-xl" />
-                  </div>
-               </div>
-            </section>
 
-            {/* Offer Section */}
-            <section className="px-4 py-6">
-               <div className="border border-dashed border-[#a4a4a4] rounded-[24px] bg-white p-5 flex relative overflow-hidden h-[140px] shadow-sm">
-                  <div className="flex flex-col justify-center w-[60%] relative z-10 text-gray-900">
-                     <h2 className="text-[16px] font-black leading-[1.2] flex items-center gap-1.5 mb-2 text-[#004b23]">
-                        <span className="text-[18px]">🏷️</span> বিশেষ অফার
-                     </h2>
-                     <p className="text-gray-700 text-[10px] font-bold leading-[1.3] mb-3">
-                        ইসলামিক পণ্যে বিশেষ অফার<br/>প্রিমিয়াম ইসলামিক সামগ্রীতে বিশেষ ছাড়
-                     </p>
-                     <button className="bg-[#004b23] text-white px-4 py-2 rounded-[20px] text-[10px] font-black w-fit tracking-wide shadow-md flex items-center gap-1">
-                       অফার দেখুন <ChevronRight className="w-3 h-3" />
-                     </button>
-                  </div>
-                  <div className="absolute right-[-5%] bottom-[-10%] h-[120%] w-[50%] flex items-end justify-end">
-                     <img src="https://images.unsplash.com/photo-1579998188289-53b0e145efab?w=400&q=80" alt="Offer Islamic" className="w-full h-[90%] object-contain drop-shadow-2xl" />
-                  </div>
-               </div>
-            </section>
 
             {/* All Products */}
             <section className="px-4 py-2">
@@ -2106,51 +1988,7 @@ export const ProductListing: React.FC = () => {
                </div>
             </section>
 
-            {/* Featured Fashion Section */}
-            <section className="px-4 py-2 text-[#efead8]">
-               <h3 className="text-[13px] font-black tracking-wider uppercase mb-3 flex items-center gap-1.5">
-                 <span className="text-[16px]">✨</span> FEATURED FASHION
-               </h3>
-               <div className="bg-[#f0ece1] rounded-[24px] p-5 flex relative overflow-hidden h-[160px] shadow-lg">
-                  <div className="flex flex-col justify-center w-[55%] relative z-10 text-gray-900">
-                     <h2 className="text-[16px] font-black leading-[1.2] flex items-center gap-1.5 mb-2">
-                        <span className="text-[18px]">✨</span> আপনার স্টাইলের<br/>নতুন সংযোজন
-                     </h2>
-                     <p className="text-gray-700 text-[11px] font-bold leading-[1.4] mb-3">
-                        আপনার স্টাইলের নতুন সংযোজন
-                     </p>
-                     <button className="bg-black text-[#f6f4f0] px-4 py-2 rounded-[20px] text-[10px] font-black w-fit tracking-wide shadow-md">
-                       [ এখনই দেখুন ]
-                     </button>
-                  </div>
-                  <div className="absolute right-[-5%] top-[-10%] h-[120%] w-[55%] flex items-center py-2">
-                     <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80" alt="Featured Fashion" className="w-full h-full object-contain drop-shadow-xl" />
-                  </div>
-               </div>
-            </section>
 
-            {/* Offer Section */}
-            <section className="px-4 py-6 text-[#efead8]">
-               <h3 className="text-[13px] font-black tracking-wider uppercase mb-3 flex items-center gap-1.5">
-                 <span className="text-[16px]">🏷️</span> OFFER
-               </h3>
-               <div className="bg-[#f0ece1] rounded-[24px] p-5 flex relative overflow-hidden h-[140px] shadow-lg">
-                  <div className="flex flex-col justify-center w-[60%] relative z-10 text-gray-900">
-                     <h2 className="text-[16px] font-black leading-[1.2] flex items-center gap-1.5 mb-2">
-                        <span className="text-[18px]">🏷️</span> আজকের ফ্যাশন অফার
-                     </h2>
-                     <p className="text-gray-700 text-[11px] font-bold leading-[1.3] mb-3">
-                        প্রিমিয়াম ফ্যাশন সেটে বিশেষ ছাড়
-                     </p>
-                     <button className="bg-black text-[#f6f4f0] px-4 py-2 rounded-[20px] text-[10px] font-black w-fit tracking-wide shadow-md">
-                       [ অফার দেখুন ]
-                     </button>
-                  </div>
-                  <div className="absolute right-[-5%] bottom-[-10%] h-[120%] w-[50%] flex items-end justify-end">
-                     <img src="https://images.unsplash.com/photo-1575032617751-6d43e5c98692?w=400&q=80" alt="Offer Gift" className="w-full h-[90%] object-contain drop-shadow-2xl" />
-                  </div>
-               </div>
-            </section>
 
             {/* All Products */}
             <section className="px-4 py-2 text-[#efead8]">
@@ -2369,26 +2207,7 @@ export const ProductListing: React.FC = () => {
                </div>
             </section>
 
-            {/* Featured Gift Section */}
-            <section className="px-4 py-2">
-               <h3 className="text-gray-800 text-[13px] font-black tracking-wider uppercase mb-3">FEATURED GIFT SECTION</h3>
-               <div className="bg-[#f2f1ef] rounded-[32px] p-5 flex relative overflow-hidden h-[160px]">
-                  <div className="flex flex-col justify-center w-[60%] relative z-10">
-                     <span className="text-gray-900 text-[18px] font-black leading-[1.2] flex items-center gap-1.5 mb-2">
-                        <span className="text-[20px]">💝</span> বিশেষ কারও জন্য
-                     </span>
-                     <p className="text-gray-700 text-[11px] font-bold leading-[1.4] mb-3">
-                        ভালোবাসা প্রকাশের জন্য<br/>একটি সুন্দর উপহার
-                     </p>
-                     <button className="bg-black text-[#f6f4f0] px-4 py-2 rounded-xl text-[10px] font-black w-fit tracking-wide">
-                       [ এখনই দেখুন ]
-                     </button>
-                  </div>
-                  <div className="absolute right-[-2%] top-0 bottom-0 h-full w-[45%] flex items-center py-3">
-                     <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&q=80" alt="Featured Gift" className="w-full h-full object-contain drop-shadow-xl" />
-                  </div>
-               </div>
-            </section>
+
 
             {/* All Products in Gift */}
             <section className="px-4 py-6">
@@ -2909,31 +2728,7 @@ export const ProductListing: React.FC = () => {
         </section>
       )}
 
-      {/* Today's Special Offer (Beauty) */}
-      {isBeauty && (
-        <section className="px-4 py-6">
-           <div className={`bg-gradient-to-r from-[#d9c5b2] to-[#8b5e34] rounded-[32px] p-6 relative overflow-hidden shadow-xl`}>
 
-              <div className="relative z-10 flex items-center justify-between gap-4">
-                 <div className="flex items-center gap-4 max-w-[70%]">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0">
-                      <span className="text-[24px]">🏷️</span>
-                    </div>
-                    <div>
-                        <h3 className="text-gray-900 text-[13px] font-black uppercase tracking-tight">আজকের বিশেষ অফার</h3>
-                       <p className="text-white text-[15px] font-black leading-tight mt-1">
-                         সব স্কিন কেয়ারের ৩০% ছাড়
-                       </p>
-                    </div>
-                 </div>
-                 <button className="bg-[#8b5e34] text-white px-5 py-2.5 rounded-xl text-[12px] font-black active:scale-95 transition-all shadow-lg">
-                   এখনই কিনুন
-                 </button>
-              </div>
-
-           </div>
-        </section>
-      )}
 
       {/* Trust Badges */}
       {!isFood && (

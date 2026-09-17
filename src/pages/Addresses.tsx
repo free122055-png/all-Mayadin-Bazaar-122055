@@ -28,6 +28,7 @@ export const Addresses: React.FC = () => {
   const [fullAddress, setFullAddress] = useState("");
   const [receiverName, setReceiverName] = useState("");
   const [phone, setPhone] = useState("");
+  const [loadingLocation, setLoadingLocation] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -96,6 +97,66 @@ export const Addresses: React.FC = () => {
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `addresses/${id}`);
     }
+  };
+
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("আপনার ডিভাইসে লোকেশন সার্ভিস সাপোর্ট করে না।");
+      return;
+    }
+
+    setLoadingLocation(true);
+    
+    // Fallback if geolocation takes too long
+    const timeout = setTimeout(() => {
+       if (loadingLocation) {
+         setLoadingLocation(false);
+         alert("লোকেশন পেতে সময় লাগছে। দয়া করে নিশ্চিত করুন আপনার ডিভাইসের GPS/লোকেশন সার্ভিস চালু রয়েছে।");
+       }
+    }, 10000);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        clearTimeout(timeout);
+        const { latitude, longitude } = position.coords;
+        try {
+          // Fallback to a client-side reverse geocoding approach
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
+            headers: {
+              'Accept-Language': 'bn-BD,bn;q=0.9,en-US;q=0.8,en;q=0.7' // Request Bengali if possible
+            }
+          });
+          const data = await response.json();
+          if (data && data.display_name) {
+            setFullAddress(data.display_name);
+          } else {
+            setFullAddress(`অক্ষাংশ: ${latitude.toFixed(6)}, দ্রাঘিমাংশ: ${longitude.toFixed(6)}`);
+          }
+        } catch (error) {
+          console.error("Error fetching address:", error);
+          setFullAddress(`অক্ষাংশ: ${latitude.toFixed(6)}, দ্রাঘিমাংশ: ${longitude.toFixed(6)}`);
+        } finally {
+          setLoadingLocation(false);
+        }
+      },
+      (error) => {
+        clearTimeout(timeout);
+        console.error("Error getting location:", error.message || error);
+        
+        let errorMsg = "লোকেশন পাওয়া যায়নি। দয়া করে ডিভাইসের জিপিএস (GPS) অন করুন।";
+        if (error.code === 1) { // PERMISSION_DENIED
+           errorMsg = "লোকেশন পারমিশন দেওয়া হয়নি। দয়া করে ডিভাইসের সেটিংস থেকে লোকেশন পারমিশন এলাউ (Allow) করুন।";
+        } else if (error.code === 2) { // POSITION_UNAVAILABLE
+           errorMsg = "বর্তমান লোকেশন সিগন্যাল পাওয়া যাচ্ছে না। আপনার জিপিএস বা ইন্টারনেট সংযোগ চেক করুন।";
+        } else if (error.code === 3) { // TIMEOUT
+           errorMsg = "লোকেশন পেতে অনেক বেশি সময় লাগছে। দয়া করে আবার চেষ্টা করুন।";
+        }
+        
+        alert(errorMsg);
+        setLoadingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   };
 
   const getLabelIcon = (label: string) => {
@@ -266,7 +327,22 @@ export const Addresses: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-gray-400 ml-1">পূর্ণ ঠিকানা</label>
+                  <div className="flex items-center justify-between ml-1">
+                    <label className="text-xs font-black text-gray-400">পূর্ণ ঠিকানা</label>
+                    <button 
+                      type="button" 
+                      onClick={handleGetCurrentLocation}
+                      disabled={loadingLocation}
+                      className="text-[10px] font-black text-[#004b23] bg-emerald-50 px-3 py-1.5 rounded-xl active:scale-95 flex items-center gap-1 transition-all disabled:opacity-50"
+                    >
+                      {loadingLocation ? (
+                        <div className="w-3 h-3 border-2 border-[#004b23] border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <MapPin className="w-3 h-3" />
+                      )}
+                      {loadingLocation ? "লোকেশন খুঁজছে..." : "লাইভ লোকেশন সেট করুন"}
+                    </button>
+                  </div>
                   <textarea 
                     value={fullAddress}
                     onChange={(e) => setFullAddress(e.target.value)}

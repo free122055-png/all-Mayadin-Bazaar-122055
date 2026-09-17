@@ -317,30 +317,6 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({ isOpen, onClose }) => {
                 )}
               </div>
 
-              {/* 3. অ্যাকাউন্ট (Account) */}
-              <div className="bg-white rounded-2xl border border-gray-200/80 shadow-xs overflow-hidden">
-                <div className="bg-[#f8faf9] px-4 py-2 text-[11px] font-black uppercase tracking-wider text-emerald-900 border-b border-gray-100">
-                  অ্যাকাউন্ট
-                </div>
-                <div className="divide-y divide-gray-100/90 text-[13px]">
-                  
-                  {/* অ্যাকাউন্ট সেটিংস */}
-                  <button
-                    onClick={() => handleNavigate("/account-settings")}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-emerald-50/50 text-gray-800 font-bold transition-colors text-left group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <Settings className="w-4 h-4 stroke-[2.2]" />
-                      </div>
-                      <span className="group-hover:text-blue-700 transition-colors">অ্যাকাউন্ট সেটিংস</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-700 group-hover:translate-x-0.5 transition-all" />
-                  </button>
-
-                </div>
-              </div>
-
               {/* 3. সার্ভিস ও সুবিধা (Services & Benefits) */}
               <div className="bg-white rounded-2xl border border-gray-200/80 shadow-xs overflow-hidden">
                 <div className="bg-[#f8faf9] px-4 py-2 text-[11px] font-black uppercase tracking-wider text-emerald-900 border-b border-gray-100">

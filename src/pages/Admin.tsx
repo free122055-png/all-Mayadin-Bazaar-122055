@@ -4,7 +4,7 @@ import {
   ArrowLeft, Menu, Save, Upload, X, Plus, Tag, CheckCircle2, 
   AlertCircle, Percent, Image as ImageIcon, PackagePlus, 
   Package, Truck, ClipboardList, LayoutDashboard, Settings,
-  LayoutGrid, Users, Download, KeyRound, Copy, Home as HomeIcon, Bell, Mail, Eye
+  LayoutGrid, Users, Download, KeyRound, Copy, Home as HomeIcon, Bell, Mail, Eye, Radio
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { db } from "../lib/firebase";
@@ -23,6 +23,7 @@ import { IntegrationCenter } from "../components/admin/IntegrationCenter";
 import { UserManagement } from "../components/admin/UserManagement";
 import { OneSignalConfig } from "../components/admin/OneSignalConfig";
 import { EmailAutomationSection } from "../components/admin/EmailAutomationSection";
+import { FloatingBubbleAdminSettings } from "../components/admin/FloatingBubbleAdminSettings";
 
 const CERT_TEXT = `-----BEGIN CERTIFICATE-----
 MIIDrDCCApSgAwIBAgIUbgYcPFUN2XsLeghtCPsqIYtBzaswDQYJKoZIhvcNAQEL
@@ -50,7 +51,7 @@ OVKwXvSuAXa961yvmxhloAvVNj3PHewurSsi+j//+6+EtA9G5LJmj+1BBhxglwOk
 export const Admin: React.FC = () => {
   // Navigation Menu State
   const [activeMenu, setActiveMenu] = useState<
-    "all-products" | "add-product" | "banner-management" | "delivery-settings" | "delivery-management" | "orders" | "food-subcategories" | "category-icons" | "category-visibility" | "main-banners" | "integration-center" | "user-management" | "onesignal" | "signing-keystore" | "email-automation"
+    "all-products" | "add-product" | "banner-management" | "delivery-settings" | "delivery-management" | "orders" | "food-subcategories" | "category-icons" | "category-visibility" | "main-banners" | "integration-center" | "user-management" | "onesignal" | "signing-keystore" | "email-automation" | "floating-bubble"
   >("all-products");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUserForNotification, setSelectedUserForNotification] = useState<any>(null);
@@ -382,9 +383,9 @@ export const Admin: React.FC = () => {
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 flex items-center gap-1.5 min-w-max">
           {[
             { id: "all-products", label: "সকল প্রোডাক্ট", icon: Package },
-            { id: "signing-keystore", label: "🔑 সাইনিং কি (.keystore)", icon: KeyRound },
-            { id: "add-product", label: "নতুন প্রোডাক্ট যোগ", icon: PackagePlus },
             { id: "orders", label: "অর্ডারসমূহ", icon: ClipboardList },
+            { id: "floating-bubble", label: "💬 ফ্লোটিং বাবল", icon: Radio },
+            { id: "signing-keystore", label: "🔑 সাইনিং কি (.keystore)", icon: KeyRound },
             { id: "user-management", label: "ইউজার", icon: Users },
             { id: "banner-management", label: "ব্যানার", icon: ImageIcon },
             { id: "delivery-management", label: "কুরিয়ার ডেলিভারি", icon: Truck },
@@ -546,6 +547,15 @@ export const Admin: React.FC = () => {
                   active={activeMenu === "orders"}
                   onClick={() => {
                     setActiveMenu("orders");
+                    setIsDrawerOpen(false);
+                  }}
+                />
+                <MenuButton
+                  icon={<Radio className="text-emerald-500 animate-pulse" />}
+                  label="💬 ফ্লোটিং বাবল অর্ডার ট্র্যাকিং"
+                  active={activeMenu === "floating-bubble"}
+                  onClick={() => {
+                    setActiveMenu("floating-bubble");
                     setIsDrawerOpen(false);
                   }}
                 />
@@ -923,6 +933,9 @@ export const Admin: React.FC = () => {
         ) : activeMenu === "orders" ? (
           /* VIEW 5: ORDER MANAGEMENT */
           <OrderManagement />
+        ) : activeMenu === "floating-bubble" ? (
+          /* VIEW: FLOATING BUBBLE ORDER TRACKING SETTINGS */
+          <FloatingBubbleAdminSettings />
         ) : activeMenu === "food-subcategories" ? (
           /* VIEW 6: FOOD SUBCATEGORIES MANAGEMENT */
           <FoodSubcategoryManagement />

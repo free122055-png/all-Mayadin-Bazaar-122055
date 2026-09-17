@@ -440,6 +440,10 @@ export const FoodBuyFlow: React.FC = () => {
 
     const orderPayload = {
       orderId: uniqueOrderId,
+      orderNumber: uniqueOrderId,
+      userId: user?.uid || profile?.id || "",
+      customerName: activeAddress?.name || profile?.displayName || user?.displayName || "গ্রাহক",
+      customerPhone: activeAddress?.phone || profile?.phoneNumber || "",
       items: orderItems.map(item => ({
         id: item.id,
         nameBn: item.nameBn,
@@ -457,6 +461,7 @@ export const FoodBuyFlow: React.FC = () => {
       totalWeightKg: totalWeightKg,
       deliveryMethod: deliveryMethod === "home" ? "হোম ডেলিভারি" : "দোকান / পিকআপ",
       deliveryCharge: deliveryCharge,
+      total: grandTotal,
       grandTotal: grandTotal,
       paymentMethod: paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod.toUpperCase(),
       paymentStatus: paymentMethod === "cod" ? "unpaid" : (transactionId ? "pending_verification" : "unpaid"),
@@ -478,7 +483,10 @@ export const FoodBuyFlow: React.FC = () => {
 
     try {
       try {
-        await addDoc(collection(db, "food_orders"), orderPayload);
+        const docRef = await addDoc(collection(db, "food_orders"), orderPayload);
+        try {
+          localStorage.setItem("last_placed_order_id", docRef.id);
+        } catch (e) {}
       } catch (e) {
         console.warn("Firestore sync log:", e);
       }

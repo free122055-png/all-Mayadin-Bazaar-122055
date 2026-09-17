@@ -1,4 +1,4 @@
-package com.almayadinbazar.app;
+package com.dailyinternetoffer.bd;
 
 import android.Manifest;
 import android.content.Intent;
@@ -134,4 +134,3 @@ public class MainActivity extends BridgeActivity {
         }
     }
 }
-

@@ -79,7 +79,7 @@ export const Account: React.FC = () => {
     { icon: MapPin, label: "📍 সংরক্ষিত ঠিকানা", path: "/addresses" },
     { icon: Bell, label: "🔔 বিজ্ঞপ্তি", path: "/notifications", count: unreadCount > 0 ? unreadCount.toString() : null },
     { icon: User, label: "👤 প্রোফাইল এডিট", action: () => setIsEditing(true) },
-    { icon: Settings, label: "⚙️ অ্যাকাউন্ট ও পাসওয়ার্ড সেটিংস", path: "/account/settings" },
+    { icon: Settings, label: "⚙️ অ্যাকাউন্ট ও পাসওয়ার্ড সেটিংস", path: "/account-settings" },
   ];
 
   const legalMenu = [

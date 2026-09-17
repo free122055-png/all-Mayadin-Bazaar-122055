@@ -17,7 +17,8 @@ import {
   MapPin,
   Calendar,
   XCircle,
-  CheckCircle2
+  CheckCircle2,
+  Send
 } from "lucide-react";
 
 interface OrderItem {
@@ -63,14 +64,25 @@ export const OrderManagement: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [trackingNoteInput, setTrackingNoteInput] = useState("");
+  const [isUpdatingTracking, setIsUpdatingTracking] = useState(false);
+  const [trackingUpdateSuccess, setTrackingUpdateSuccess] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, "food_orders"), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const ordersData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Order[];
+      const ordersData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          orderNumber: data.orderNumber || data.orderId || doc.id.slice(0, 8).toUpperCase(),
+          customerName: data.customerName || data.name || data.shippingAddress?.name || data.shippingAddress?.fullName || "সম্মানিত গ্রাহক",
+          customerPhone: data.customerPhone || data.phone || data.rawPhone || data.shippingAddress?.phone || "ফোন নেই",
+          status: data.status || data.internalStatus || "Pending",
+          grandTotal: data.grandTotal || data.total || 0,
+        };
+      }) as Order[];
       setOrders(ordersData);
       setLoading(false);
     }, (error) => {
@@ -92,6 +104,29 @@ export const OrderManagement: React.FC = () => {
       }
     } catch (error) {
       console.error("Error updating status:", error);
+    }
+  };
+
+  const handleSendTargetedLocation = async (orderId: string, message: string) => {
+    if (!orderId) return;
+    setIsUpdatingTracking(true);
+    setTrackingUpdateSuccess(false);
+    try {
+      await updateDoc(doc(db, "food_orders", orderId), {
+        trackingMessage: message,
+        currentLocation: message,
+        updatedAt: Date.now()
+      });
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(prev => prev ? ({ ...prev, trackingMessage: message, currentLocation: message } as any) : null);
+      }
+      setTrackingUpdateSuccess(true);
+      setTimeout(() => setTrackingUpdateSuccess(false), 3000);
+    } catch (err) {
+      console.error("Error sending targeted location message:", err);
+      alert("মেসেজ পাঠাতে সমস্যা হয়েছে।");
+    } finally {
+      setIsUpdatingTracking(false);
     }
   };
 
@@ -253,6 +288,8 @@ export const OrderManagement: React.FC = () => {
                       <button 
                         onClick={() => {
                           setSelectedOrder(order);
+                          setTrackingNoteInput((order as any)?.trackingMessage || (order as any)?.currentLocation || "");
+                          setTrackingUpdateSuccess(false);
                           setIsModalOpen(true);
                         }}
                         className="p-2 text-[#5842dc] hover:bg-indigo-50 rounded-xl transition-all"
@@ -316,6 +353,67 @@ export const OrderManagement: React.FC = () => {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Targeted Live Location & In-App Bubble Message */}
+              <div className="bg-emerald-50/80 border border-emerald-200/90 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                    <h4 className="text-xs font-black text-[#004b23] uppercase tracking-wider">
+                      💬 গ্রাহকের স্ক্রিনের ফ্লোটিং বাবলে লাইভ লোকেশন আপডেট পাঠান
+                    </h4>
+                  </div>
+                  <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100/80 px-2 py-0.5 rounded-md">
+                    শুধুমাত্র এই কাস্টমারের ফোনেই যাবে
+                  </span>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={trackingNoteInput}
+                    onChange={(e) => setTrackingNoteInput(e.target.value)}
+                    placeholder="যেমন: রাইডার বনানী মোড়ে আছে / হাব থেকে রওনা হয়েছে..."
+                    className="flex-1 bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#004b23]"
+                  />
+                  <button
+                    onClick={() => handleSendTargetedLocation(selectedOrder.id, trackingNoteInput)}
+                    disabled={isUpdatingTracking || !trackingNoteInput.trim()}
+                    className="px-4 py-2 bg-[#004b23] hover:bg-[#003618] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>{isUpdatingTracking ? "পাঠানো হচ্ছে..." : "আপডেট পাঠান"}</span>
+                  </button>
+                </div>
+
+                {/* Quick Preset Pills */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] font-bold text-gray-500">কুইক প্রিসেট:</span>
+                  {[
+                    "🛵 রাইডার আপনার ঠিকানায় রওনা হয়েছে",
+                    "📦 প্যাকেজিং সম্পন্ন, কুরিয়ারে হস্তান্তর হয়েছে",
+                    "🏢 ডেলিভারি হাবে পৌঁছেছে",
+                    "⏱️ আগামী ১৫-২০ মিনিটের মধ্যে পৌঁছাবে",
+                    "📍 রাইডার আপনার বাসার কাছাকাছি পৌঁছেছে"
+                  ].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setTrackingNoteInput(preset)}
+                      className="px-2.5 py-1 bg-white hover:bg-emerald-100 border border-emerald-200 rounded-lg text-[10px] font-bold text-[#004b23] transition-colors cursor-pointer"
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+
+                {trackingUpdateSuccess && (
+                  <p className="text-[11px] font-bold text-emerald-700 flex items-center gap-1 animate-fade-in">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>এই গ্রাহকের অ্যাপের ফ্লোটিং বাবলে লাইভ লোকেশন মেসেজ পৌঁছে দেওয়া হয়েছে!</span>
+                  </p>
+                )}
               </div>
 
               {/* Customer Info */}

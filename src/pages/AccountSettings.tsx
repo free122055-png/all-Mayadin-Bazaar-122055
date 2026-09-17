@@ -41,11 +41,37 @@ export const AccountSettings: React.FC = () => {
   const [smsOrderAlerts, setSmsOrderAlerts] = useState(true);
   const [promoPushAlerts, setPromoPushAlerts] = useState(true);
   const [deliveryUpdates, setDeliveryUpdates] = useState(true);
-  const [emailDigest, setEmailDigest] = useState(false);
 
   // App Preferences
   const [rememberMe, setRememberMe] = useState(true);
   const [language, setLanguage] = useState("bn");
+
+  // Load preferences from profile
+  useEffect(() => {
+    if (profile) {
+      if (profile.preferences) {
+        if (profile.preferences.smsOrderAlerts !== undefined) setSmsOrderAlerts(profile.preferences.smsOrderAlerts);
+        if (profile.preferences.promoPushAlerts !== undefined) setPromoPushAlerts(profile.preferences.promoPushAlerts);
+        if (profile.preferences.deliveryUpdates !== undefined) setDeliveryUpdates(profile.preferences.deliveryUpdates);
+        if (profile.preferences.rememberMe !== undefined) setRememberMe(profile.preferences.rememberMe);
+        if (profile.preferences.language !== undefined) setLanguage(profile.preferences.language);
+      }
+    }
+  }, [profile]);
+
+  const handleUpdatePreference = async (key: string, value: any) => {
+    if (!user) return;
+    try {
+      await setDoc(doc(db, "users", user.uid), {
+        preferences: {
+          [key]: value
+        }
+      }, { merge: true });
+      await refreshProfile();
+    } catch (error) {
+      console.error("Error updating preference", error);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -412,7 +438,10 @@ export const AccountSettings: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={smsOrderAlerts}
-                  onChange={(e) => setSmsOrderAlerts(e.target.checked)}
+                  onChange={(e) => {
+                    setSmsOrderAlerts(e.target.checked);
+                    handleUpdatePreference("smsOrderAlerts", e.target.checked);
+                  }}
                   className="w-5 h-5 accent-[#004b23] rounded-lg cursor-pointer"
                 />
               </div>
@@ -425,7 +454,10 @@ export const AccountSettings: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={promoPushAlerts}
-                  onChange={(e) => setPromoPushAlerts(e.target.checked)}
+                  onChange={(e) => {
+                    setPromoPushAlerts(e.target.checked);
+                    handleUpdatePreference("promoPushAlerts", e.target.checked);
+                  }}
                   className="w-5 h-5 accent-[#004b23] rounded-lg cursor-pointer"
                 />
               </div>
@@ -438,7 +470,10 @@ export const AccountSettings: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={deliveryUpdates}
-                  onChange={(e) => setDeliveryUpdates(e.target.checked)}
+                  onChange={(e) => {
+                    setDeliveryUpdates(e.target.checked);
+                    handleUpdatePreference("deliveryUpdates", e.target.checked);
+                  }}
                   className="w-5 h-5 accent-[#004b23] rounded-lg cursor-pointer"
                 />
               </div>
@@ -465,7 +500,10 @@ export const AccountSettings: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
+                    onChange={(e) => {
+                      setRememberMe(e.target.checked);
+                      handleUpdatePreference("rememberMe", e.target.checked);
+                    }}
                     className="w-5 h-5 accent-[#004b23] rounded-lg cursor-pointer"
                   />
                 </div>
@@ -477,11 +515,21 @@ export const AccountSettings: React.FC = () => {
                   </div>
                   <select
                     value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
+                    onChange={(e) => {
+                      const selected = e.target.value;
+                      if (selected === "en") {
+                        alert("সম্মানিত গ্রাহক, অল মায়াদিন বাজার বর্তমানে অফিসিয়ালভাবে সম্পূর্ণ বাংলা ভাষায় পরিচালিত হচ্ছে। আন্তর্জাতিক ও ইংরেজি সংস্করণটি শীঘ্রই পরবর্তী আপডেটে উন্মুক্ত করা হবে।");
+                        setLanguage("bn");
+                        handleUpdatePreference("language", "bn");
+                      } else {
+                        setLanguage(selected);
+                        handleUpdatePreference("language", selected);
+                      }
+                    }}
                     className="border border-gray-200 rounded-xl px-3 py-1.5 font-bold bg-white text-xs text-[#004b23]"
                   >
-                    <option value="bn">বাংলা (Bengali)</option>
-                    <option value="en">English</option>
+                    <option value="bn">বাংলা (ডিফল্ট)</option>
+                    <option value="en">English (শীঘ্রই আসছে)</option>
                   </select>
                 </div>
               </div>
